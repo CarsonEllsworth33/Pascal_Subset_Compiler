@@ -1,0 +1,11 @@
+need to make a line file
+
+while(not EOF )
+    read_print_line()
+
+So far while doing this I am encountering a segmentation fault, which could
+arise from opening the files incorrectly.
+
+read_print_line should not need to return anything, so it can just be a void
+function. It will also need to take in two parameters, input and output, of type
+FILE*
