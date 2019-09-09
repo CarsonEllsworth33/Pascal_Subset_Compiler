@@ -5,6 +5,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "../lexeme.c"
+#include "machines.c"
 
 void read_print_line(FILE *input, FILE *output){
     //file and output should be two open files upon the function call
@@ -23,3 +25,5 @@ void read_print_line(FILE *input, FILE *output){
         }
     }
 }
+
+//make machines here

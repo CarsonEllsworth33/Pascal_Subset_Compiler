@@ -1,0 +1,27 @@
+#date:08-31-19
+need to make a line file
+
+while(not EOF )
+    read_print_line()
+
+So far while doing this I am encountering a segmentation fault, which could
+arise from opening the files incorrectly.
+
+read_print_line should not need to return anything, so it can just be a void
+function. It will also need to take in two parameters, input and output, of type
+FILE*
+
+#date:09-01-19
+I have not worked in C very much, so this is a new learning process just for how C works as a language, so I feel like I am falling behind a bit
+
+#date:09-02-19
+proj0 completed need to get a newline function working, as well as machines
+implemented
+
+specification of tokens 3.8
+    kleene closure of a language L denoted L^* is the concatenation of L zero or
+    more times to itself
+    positive closure of a language L dentored L^+ is the same as kleene closure
+    but requires one or more concatenations. 
+
+fgets us used for grabbing a file line by line when given a loop to execute in.

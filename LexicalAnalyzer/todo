@@ -1,3 +1,0 @@
-read lines into buffer
-make buffer max length 72 chars
-print out into listing file

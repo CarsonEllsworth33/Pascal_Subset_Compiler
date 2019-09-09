@@ -1,1 +1,0 @@
-#define program 1
