@@ -1,14 +1,15 @@
-program		50	1
-
-var			52	1
-
-array       53  1
-
-of          54  1
-
-integer     55  1
-real        55  2
-longreal    55  3
-
-function    56  1
-procedure   56  2
+program
+var
+array
+of
+integer
+real
+longreal
+function
+procedure
+begin
+end
+or
+and
+div
+mod
