@@ -25,5 +25,3 @@ void read_print_line(FILE *input, FILE *output){
         }
     }
 }
-
-//make machines here

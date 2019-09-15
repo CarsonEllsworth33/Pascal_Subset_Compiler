@@ -8,6 +8,8 @@ struct Lexeme tmp = {66,{0}};
 struct Lexeme MN = {MNOTREC,{MNOTREC}};
 char letter[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 char digit[] = {'0','1','2','3','4','5','6','7','8','9'};
+int letterSize = sizeof(letter);
+int digitSize = sizeof(digit);
 
 struct Lexeme whiteSpace(char **fptr,char **bptr){
     struct Lexeme NL = {WSPACE, {WSPACE_NL}};
@@ -103,16 +105,13 @@ struct Lexeme relop(char **fptr,char **bptr){
 
 
 
-int match(char **fptr, char compArr[]){
-    int arrlen = 0;
-    if(compArr[0] == 'a'){
-        arrlen = 57;
-    }
-    else if(compArr[0] == '0'){
-        arrlen = 11;
-    }
-    for(int i = 0; i < arrlen; i++){
-        if(**fptr == compArr[i]) return 1;
+int match(char fptr, char compArr[],int arrlen){
+
+    for (int itter = 0; itter < arrlen; itter++){
+        if(fptr == compArr[itter])
+            {
+                return 1;
+            }
     }
     return 0;
 }//END MATCH
@@ -133,11 +132,11 @@ struct Lexeme idres(char **fptr, char **bptr){
 
     int counter = 0;//counter to make hard things simple
 
-    if(match(fptr,letter)){
+    if(match(**fptr,letter,letterSize)){
         //**fptr is a letter
         (*fptr)++;//buffer address pointer
         counter++;//increase counter
-        while(match(fptr,letter) || match(fptr,digit)){
+        while(match(**fptr,letter,letterSize) || match(**fptr,digit,digitSize)){
             //string[counter] = **fptr;
             (*fptr)++;
             counter++;
@@ -156,13 +155,13 @@ struct Lexeme idres(char **fptr, char **bptr){
         }
         string[counter] = '\0';
         //put something or another in token file
-        printf("counter size %d\n", counter );
-        printf("%s\n", string);
+        printf("identifier: %s\n", string);
         printf("Machine not Recognized IDRES\n");
+        return MN;
     }
     //add string to symbol table or reject
     //(if same word already exists).
-
+    printf("Machine not Recognized IDRES\n");
     return id;
 }
 
@@ -181,13 +180,31 @@ void realM(char **fptr, char **bptr){
 
 
 
-void intM(char **fptr, char **bptr){
-    struct Lexeme intData = {INTEGER,NULL};
+struct Lexeme intM(char **fptr, char **bptr){
+    struct Lexeme intData = {INTEGER};
+    intData.attr.ptr = NULL;
+    struct Lexeme interr = {LEXERROR,{INTTOOLONG}};
+
     int counter = 0;
 
-    if(match(fptr,digit)){
-
+    while(match(**fptr,digit,digitSize)){
+        (*fptr)++;
+        counter++;
     }
+    if(counter > 10){
+        printf("INTEGERTOOLONG\n");
+        *bptr = *fptr;
+        return interr;//int too long
+    }
+    char intstr[counter + 1];
+    for(int i = 0; i <= counter; i++){
+        intstr[i] = **bptr;
+        (*bptr)++;
+    }
+    intstr[counter] = '\0';
+    printf("integer: %s\n", intstr);
+    printf("Machine not Recognized INTM\n");
+    return MN;
 }
 
 
@@ -205,6 +222,10 @@ void addop(){}
 
 
 int main(){
+    // int isMatch = match('5',digit,digitSize);
+    // int isDMatch = match('0',letter,letterSize);
+    // printf("match: %d\n", isMatch);
+    // printf("Dmatch: %d\n", isDMatch);
     //this is a test main to try out the machines once they are ready
     char buffer[72];
     char *fptr = buffer;
@@ -215,16 +236,16 @@ int main(){
 
 
 //process till EOF
-while(fgets(buffer,sizeof(buffer),input) != NULL){
-    fptr=buffer;
-    bptr=buffer;
-    printf("current buffer line: %s\n", buffer);
+    while(fgets(buffer,sizeof(buffer),input) != NULL){
+        fptr=buffer;
+        bptr=buffer;
+        printf("current buffer line: %s\n", buffer);
 
-    while(whiteSpace(&fptr,&bptr).attr.val != WSPACE_NL){
-
-        relop(&fptr,&bptr);
-        idres(&fptr,&bptr);
-    }
+        while(whiteSpace(&fptr,&bptr).attr.val != WSPACE_NL){
+            relop(&fptr,&bptr);
+            idres(&fptr,&bptr);
+            intM(&fptr,&bptr);
+        }
     /*
     while(whiteSpace(fptr,bptr).attr.val == WSPACE_BL){
         //keep whitespacing
@@ -238,7 +259,7 @@ while(fgets(buffer,sizeof(buffer),input) != NULL){
 
     }
     */
-}
+    }
     //printf("f pointer: %p\nf value: %c\nb pointer: %p\nb value: %c\n",fptr,*fptr,bptr,*fptr);
     return 0;
 }
