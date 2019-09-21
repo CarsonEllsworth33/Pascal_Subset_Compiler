@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../lexeme.c"
 #include <regex.h>
+#include "../lexeme.c"
+#include "../symbolNode.c"
 
-
-struct Lexeme tmp = {66,{0}};
 struct Lexeme MN = {MNOTREC,{MNOTREC}};
 char letter[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 char digit[] = {'0','1','2','3','4','5','6','7','8','9'};
 int letterSize = sizeof(letter);
 int digitSize = sizeof(digit);
+symbolNode head;
 
 struct Lexeme whiteSpace(char **fptr,char **bptr){
     struct Lexeme NL = {WSPACE, {WSPACE_NL}};
@@ -18,7 +18,6 @@ struct Lexeme whiteSpace(char **fptr,char **bptr){
 
     while(**fptr == ' '){
         //stay in loop and advance till item seen
-        printf("blank returned\n");
         (*fptr)++;
         *bptr =  *fptr;
     }
@@ -126,53 +125,145 @@ int match(char fptr, char compArr[],int arrlen){
 struct Lexeme idres(char **fptr, char **bptr){
     //const char* letter = "[a-zA-Z]";
     //user defined letter and digit alphabet
+    /* RESERVED WORDS
+    program
+    array
+    integer
+    real
+    function
+    procedure //dont need to do
+    begin
+    end
+    if
+    then
+    else
+    while
+    do
+    not
+    */
 
     struct Lexeme idtl = {LEXERROR,IDTOOLONG};
     struct Lexeme id = {ID,0};//0 is tmp value, this actually needs to be a pointer
 
     int counter = 0;//counter to make hard things simple
 
+
     if(match(**fptr,letter,letterSize)){
         //**fptr is a letter
-        (*fptr)++;//buffer address pointer
-        counter++;//increase counter
+        //(*fptr)++;//buffer address pointer
+        //counter++;//increase counter
         while(match(**fptr,letter,letterSize) || match(**fptr,digit,digitSize)){
             //string[counter] = **fptr;
             (*fptr)++;
             counter++;
         }
         //checks to see if the created string would be too long
-        if(counter > 10){
-            printf("IDTOOLONG\n");
-            *bptr = *fptr;
-            return idtl;
+        if(counter > 0){
+            if(counter > 10){
+                printf("IDTOOLONG\n");
+                *bptr = *fptr;
+                return idtl;
+            }
+            //while MNOTREC and is less than 10
+            char string[counter+1];//temp string to build up identifiers
+            for(int i = 0; i <= counter; i++){
+                string[i] = **bptr;
+                (*bptr)++;
+            }
+
+            string[counter] = '\0';
+
+            int result = isResword(head,string);
+            if( result == 0){
+                //good to add to symbolNode list
+                addNode(head,ID,string);
+            }
+
+            else{
+                printf("already existing identifier: %s\n", string);
+            }
+            printf("identifier: %s\n", string );
+            return id;
         }
-        //while MNOTREC and is less than 10
-        char string[counter+1];//temp string to build up identifiers
-        for(int i = 0; i <= counter; i++){
-            string[i] = **bptr;
-            (*bptr)++;
-        }
-        string[counter] = '\0';
-        //put something or another in token file
-        printf("identifier: %s\n", string);
-        printf("Machine not Recognized IDRES\n");
+
         return MN;
     }
-    //add string to symbol table or reject
-    //(if same word already exists).
-    printf("Machine not Recognized IDRES\n");
-    return id;
+    return MN;
 }
 
 
 
 
 
+struct Lexeme realM(char **fptr, char **bptr){
+    struct Lexeme realData = {INTEGER};
+    realData.attr.ptr = NULL;
+    struct Lexeme realerr = {LEXERROR,{REALTOOLONG}};
+    int rcounter = 0;
+    int fcounter = 0;
+    int ecounter = 0;
+    int epresent = 0;
+    while(match(**fptr,digit,digitSize)){
+        (*fptr)++;
+        fcounter++;
+    }
+    if(fcounter > 0){
+        if(**fptr == '.'){
+            (*fptr)++;
+            while(match(**fptr,digit,digitSize)){
+                (*fptr)++;
+                rcounter++;
+            }
+            if(rcounter > 0){
+                if(**fptr == 'E'){
+                    (*fptr)++;
+                    epresent = 1;
+                    while(match(**fptr,digit,digitSize)){
+                        (*fptr)++;
+                        ecounter++;
+                    }
+                }
+            }
+        }
+        else{
+            (*fptr) = (*bptr);
+            printf("Machine not Recognized REALM\n");
+            return MN;
+        }
 
+        if(fcounter > 5){
+            printf("REALFRONTTOOLONG\n");
+            return realerr;//real front too long
+        }
 
-void realM(char **fptr, char **bptr){
+        if(rcounter > 5){
+            printf("REALBACKTOOLONG\n");
+            return realerr;
+        }
 
+        if(ecounter > 2){
+            printf("REALEXPONENTTOOBIG\n");
+            return realerr;
+        }
+
+        if(fcounter+rcounter > 10){
+            printf("REALTOOLONG\n");
+            return realerr;//real too long
+        }
+        int counter = fcounter + rcounter + ecounter + epresent;
+
+        char realstr[counter + 1];//takes into account the dot and E if present
+        int strcntr = 0;
+        while(*bptr != *fptr){
+            realstr[strcntr] = **bptr;
+            (*bptr)++;
+            strcntr++;
+        }
+        realstr[strcntr] = '\0';
+        printf("real: %s\n", realstr);
+    }
+
+    return realData;
 }
 
 
@@ -191,6 +282,9 @@ struct Lexeme intM(char **fptr, char **bptr){
         (*fptr)++;
         counter++;
     }
+    if(0){
+        //need to fix the issue case of 1a1a being split into INT:1 ID:a1a
+    }
     if(counter > 10){
         printf("INTEGERTOOLONG\n");
         *bptr = *fptr;
@@ -202,16 +296,60 @@ struct Lexeme intM(char **fptr, char **bptr){
         (*bptr)++;
     }
     intstr[counter] = '\0';
-    printf("integer: %s\n", intstr);
-    printf("Machine not Recognized INTM\n");
-    return MN;
+    printf("Int: %s\n", intstr);
+    return intData;
 }
 
 
 
+
+
+struct Lexeme catchallM(char **fptr,char **bptr){
+    //Here we need to support addops(+ - or) mulops(* / div mod and)
+    //assignop(:=) doubledot(..) dot(.)
+    //and handle any unrecognized symbol
+    //div mod and or are all going to be recognized by the
+    struct Lexeme plus;
+    plus.tkn = ADDOP;
+    plus.attr.val = ADDOP_PL;
+
+    struct Lexeme minus;
+    minus.tkn = ADDOP;
+    minus.attr.val = ADDOP_MN;
+
+    struct Lexeme times;
+    times.tkn = MULOP;
+    times.attr.val = MULOP_ML;
+
+    struct Lexeme divI;
+    divI.tkn = MULOP;
+    divI.attr.val = MULOP_DVI;
+
+    struct Lexeme divF;
+    divF.tkn = MULOP;
+    divF.attr.val = MULOP_DVF;
+
+    struct Lexeme mod;
+    mod.tkn = MULOP;
+    mod.attr.val = MULOP_MOD;
+
+    struct Lexeme assign;
+    assign.tkn = ASSIGNOP;
+    assign.attr.val = 0;
+
+    struct Lexeme dotdot;
+    dotdot.tkn = DOTDOT;
+    assign.attr.val = 0;
+
+    struct Lexeme dot;
+    dot.tkn = DOT;
+    assign.attr.val = 0;
+
+    return dot;
+}
+
+
 //these might fit better in the catch all machine
-void mulop(){}
-void addop(){}
 //
 
 
@@ -222,17 +360,11 @@ void addop(){}
 
 
 int main(){
-    // int isMatch = match('5',digit,digitSize);
-    // int isDMatch = match('0',letter,letterSize);
-    // printf("match: %d\n", isMatch);
-    // printf("Dmatch: %d\n", isDMatch);
-    //this is a test main to try out the machines once they are ready
     char buffer[72];
     char *fptr = buffer;
     char *bptr = buffer;
     FILE *input = fopen("todo.txt","r");
-
-    //fgets(buffer, sizeof(buffer), input);
+    head = reswordSetup();
 
 
 //process till EOF
@@ -244,22 +376,10 @@ int main(){
         while(whiteSpace(&fptr,&bptr).attr.val != WSPACE_NL){
             relop(&fptr,&bptr);
             idres(&fptr,&bptr);
+            realM(&fptr,&bptr);
             intM(&fptr,&bptr);
         }
-    /*
-    while(whiteSpace(fptr,bptr).attr.val == WSPACE_BL){
-        //keep whitespacing
-    }
-    //LOAD NEW LINE INTO BUFFER
-    while(whiteSpace(fptr,bptr).attr.val == WSPACE_NL){
-
-        fgets(buffer, sizeof(buffer), input);
-        fptr = buffer;
-        bptr = buffer;
 
     }
-    */
-    }
-    //printf("f pointer: %p\nf value: %c\nb pointer: %p\nb value: %c\n",fptr,*fptr,bptr,*fptr);
     return 0;
 }

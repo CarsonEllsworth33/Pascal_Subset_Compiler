@@ -39,6 +39,15 @@
 #define REALTOOLONG   2
 #define LEADINGZERO   3
 #define UNKNOWNSYMBOL 4
+#define IF            68
+#define THEN          69
+#define ELSE          70
+#define WHILE         71
+#define DO            72
+#define NOT           73
+#define DOTDOT        74
+#define DOT           75
+
 
 
 

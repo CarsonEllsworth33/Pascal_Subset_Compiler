@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include "LexicalAnalyzer/lexAnalyze.c"
 #include "lexeme.c"
+#include "symbolNode.c"
 
 int main() {
 
 	char buffer[72];
+
 
 	FILE *file = fopen("textfiles/program.txt", "r");
 	FILE *line = fopen("textfiles/listing.txt","w");
