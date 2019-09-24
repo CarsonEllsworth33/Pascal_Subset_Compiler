@@ -17,7 +17,7 @@ int parenOpen = 0;
 int parenClose = 0;
 int brackOpen = 0;
 int brackClose = 0;
-symbolNode head;
+//symbolNode head = reswordSetup();
 
 struct Lexeme whiteSpace(char **fptr,char **bptr){
     struct Lexeme NL = {WSPACE, {WSPACE_NL}};
@@ -26,6 +26,11 @@ struct Lexeme whiteSpace(char **fptr,char **bptr){
 
     while(**fptr == ' '){
         //stay in loop and advance till item seen
+        (*fptr)++;
+        *bptr =  *fptr;
+    }
+
+    while(**fptr == '\t'){
         (*fptr)++;
         *bptr =  *fptr;
     }
@@ -130,7 +135,7 @@ int match(char fptr, char compArr[],int arrlen){
 
 
 
-struct Lexeme idres(char **fptr, char **bptr){
+struct Lexeme idres(char **fptr, char **bptr, symbolNode head){
     //const char* letter = "[a-zA-Z]";
     //user defined letter and digit alphabet
     /* RESERVED WORDS
@@ -155,11 +160,9 @@ struct Lexeme idres(char **fptr, char **bptr){
 
     int counter = 0;//counter to make hard things simple
 
-
     if(match(**fptr,letter,letterSize)){
         //**fptr is a letter
         //(*fptr)++;//buffer address pointer
-        //counter++;//increase counter
         while(match(**fptr,letter,letterSize) || match(**fptr,digit,digitSize)){
             //string[counter] = **fptr;
             (*fptr)++;
@@ -180,7 +183,6 @@ struct Lexeme idres(char **fptr, char **bptr){
             }
 
             string[counter] = '\0';
-
             int result = isResword(head,string);
             if( result == 0){
                 //good to add to symbolNode list
@@ -318,6 +320,11 @@ struct Lexeme catchallM(char **fptr,char **bptr){
     //parenthesis () and brackets [] need a counter for them
     //and handle any unrecognized symbol
     //div mod and or are all going to be recognized by the
+
+    //incomplete: missing symbols to catch
+    // , ; :
+
+    //incomplete features: watching for mismatch count of paren and brackets
     struct Lexeme plus;
     plus.tkn = ADDOP;
     plus.attr.val = ADDOP_PL;
@@ -482,7 +489,7 @@ int main(void){
             if(realM(&fptr,&bptr).tkn != MN.tkn) {continue;}
             if(intM(&fptr,&bptr).tkn != MN.tkn) {continue;}
             if(catchallM(&fptr,&bptr).tkn != MN.tkn) {continue;}
-            
+
         }
 
     }

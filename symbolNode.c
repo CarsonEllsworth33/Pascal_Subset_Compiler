@@ -86,21 +86,6 @@ int isResword(symbolNode head,char name[]){
 
 symbolNode reswordSetup(void){
     symbolNode head = createNode(0,"temp",0);
-    /*addNode(head,50,"program");
-    addNode(head,51,"var");
-    addNode(head,53,"array");
-    addNode(head,54,"of");
-    addNode(head,55,"integer");
-    addNode(head,56,"real");
-    addNode(head,58,"function");
-    addNode(head,60,"begin");
-    addNode(head,61,"end");
-    addNode(head,68,"if");
-    addNode(head,69,"then");
-    addNode(head,70,"else");
-    addNode(head,71,"while");
-    addNode(head,72,"do");
-    addNode(head,73,"not"); */
     return head;
 }
 
