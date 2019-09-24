@@ -1,3 +1,6 @@
+#ifndef RUN_H
+#define RUN_H
+
 #include <stdio.h>
 #include "LexicalAnalyzer/lexAnalyze.c"
 #include "lexeme.c"
@@ -19,5 +22,6 @@ int main() {
 	struct Lexeme tmp = getLexeme(10);
 	printf("getLexeme tkn: %d\ngetLexeme attr: %d\n",tmp.lxm,tmp.attr.val);
 	return 0;
-
 }
+
+#endif

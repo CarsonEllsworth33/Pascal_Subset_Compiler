@@ -1,14 +1,22 @@
+#ifndef MACHINES_H
+#define MACHINES_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <regex.h>
 #include "../lexeme.c"
 #include "../symbolNode.c"
+#include "resword.c"
 
 struct Lexeme MN = {MNOTREC,{MNOTREC}};
 char letter[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 char digit[] = {'0','1','2','3','4','5','6','7','8','9'};
 int letterSize = sizeof(letter);
 int digitSize = sizeof(digit);
+int parenOpen = 0;
+int parenClose = 0;
+int brackOpen = 0;
+int brackClose = 0;
 symbolNode head;
 
 struct Lexeme whiteSpace(char **fptr,char **bptr){
@@ -29,7 +37,7 @@ struct Lexeme whiteSpace(char **fptr,char **bptr){
     }
 
     //*bptr = *fptr; //could be source of problem
-    printf("Machine Not Recognized WS\n");
+    printf("MACHINE NOT RECOGNIZED WS\n");
     return MN;
 }//END WHITESPACE MACHINE
 
@@ -96,7 +104,7 @@ struct Lexeme relop(char **fptr,char **bptr){
         return EQ;
     }
     *bptr = *fptr;
-    printf("Machine not Recognized RE\n");
+    printf("MACHINE NOT RECOGNIZED RELOP\n");
     return MN;
 }//END RELOP MACHINE
 
@@ -176,7 +184,7 @@ struct Lexeme idres(char **fptr, char **bptr){
             int result = isResword(head,string);
             if( result == 0){
                 //good to add to symbolNode list
-                addNode(head,ID,string);
+                addNode(head,ID,string,0);//this last value should be a pointer
             }
 
             else{
@@ -185,9 +193,8 @@ struct Lexeme idres(char **fptr, char **bptr){
             printf("identifier: %s\n", string );
             return id;
         }
-
-        return MN;
     }
+    printf("MACHINE NOT RECOGNIZED IDRES\n");
     return MN;
 }
 
@@ -227,7 +234,7 @@ struct Lexeme realM(char **fptr, char **bptr){
         }
         else{
             (*fptr) = (*bptr);
-            printf("Machine not Recognized REALM\n");
+            printf("MACHINE NOT RECOGNIZED REALM\n");
             return MN;
         }
 
@@ -261,9 +268,9 @@ struct Lexeme realM(char **fptr, char **bptr){
         }
         realstr[strcntr] = '\0';
         printf("real: %s\n", realstr);
+        return realData;
     }
-
-    return realData;
+    return MN;
 }
 
 
@@ -282,22 +289,23 @@ struct Lexeme intM(char **fptr, char **bptr){
         (*fptr)++;
         counter++;
     }
-    if(0){
-        //need to fix the issue case of 1a1a being split into INT:1 ID:a1a
-    }
     if(counter > 10){
         printf("INTEGERTOOLONG\n");
         *bptr = *fptr;
         return interr;//int too long
     }
-    char intstr[counter + 1];
-    for(int i = 0; i <= counter; i++){
-        intstr[i] = **bptr;
-        (*bptr)++;
+    if(counter > 0){
+        char intstr[counter + 1];
+        for(int i = 0; i <= counter; i++){
+            intstr[i] = **bptr;
+            (*bptr)++;
+        }
+        intstr[counter] = '\0';
+        printf("Int: %s\n", intstr);
+        return intData;
     }
-    intstr[counter] = '\0';
-    printf("Int: %s\n", intstr);
-    return intData;
+    printf("MACHINE NOT RECOGNIZED INT\n");
+    return MN;
 }
 
 
@@ -307,6 +315,7 @@ struct Lexeme intM(char **fptr, char **bptr){
 struct Lexeme catchallM(char **fptr,char **bptr){
     //Here we need to support addops(+ - or) mulops(* / div mod and)
     //assignop(:=) doubledot(..) dot(.)
+    //parenthesis () and brackets [] need a counter for them
     //and handle any unrecognized symbol
     //div mod and or are all going to be recognized by the
     struct Lexeme plus;
@@ -321,17 +330,17 @@ struct Lexeme catchallM(char **fptr,char **bptr){
     times.tkn = MULOP;
     times.attr.val = MULOP_ML;
 
-    struct Lexeme divI;
+    /*struct Lexeme divI; // this is keyword div
     divI.tkn = MULOP;
-    divI.attr.val = MULOP_DVI;
+    divI.attr.val = MULOP_DVI;*/
 
-    struct Lexeme divF;
+    struct Lexeme divF; // this is symbol: /
     divF.tkn = MULOP;
     divF.attr.val = MULOP_DVF;
 
-    struct Lexeme mod;
+    /*struct Lexeme mod;
     mod.tkn = MULOP;
-    mod.attr.val = MULOP_MOD;
+    mod.attr.val = MULOP_MOD;*/
 
     struct Lexeme assign;
     assign.tkn = ASSIGNOP;
@@ -345,7 +354,96 @@ struct Lexeme catchallM(char **fptr,char **bptr){
     dot.tkn = DOT;
     assign.attr.val = 0;
 
-    return dot;
+    struct Lexeme openParen;
+    openParen.tkn = PAREN;
+    openParen.attr.val = PAREN_OPEN;
+
+    struct Lexeme closeParen;
+    closeParen.tkn = PAREN;
+    closeParen.attr.val = PAREN_CLOSE;
+
+    struct Lexeme openBrack;
+    openBrack.tkn = BRACK;
+    openBrack.attr.val = BRACK_OPEN;
+
+    struct Lexeme closeBrack;
+    closeBrack.tkn = BRACK;
+    closeBrack.attr.val = BRACK_CLOSE;
+
+    struct Lexeme unrec;
+    unrec.tkn = LEXERROR;
+    unrec.attr.val = UNKNOWNSYMBOL;
+
+
+    if(**fptr == '.'){
+        (*fptr)++;
+        if(**fptr == '.'){
+            (*fptr)++;
+            return dotdot;
+        }
+        else{
+            return dot;
+        }
+    }
+
+    if(**fptr == ':'){
+        (*fptr)++;
+        if(**fptr == '='){
+            printf("assignop returned\n" );
+            return assign;
+        }
+        else{
+            //unrecognized symbol
+            return unrec;
+        }
+    }
+
+    if(**fptr == '*'){
+        (*fptr)++;
+        return times;
+    }
+
+    if(**fptr == '/'){
+        (*fptr)++;
+        return divF;
+    }
+
+    if(**fptr == '+'){
+        (*fptr)++;
+        return plus;
+    }
+
+    if(**fptr == '-'){
+        (*fptr)++;
+        return minus;
+    }
+
+    if(**fptr == '('){
+        (*fptr)++;
+        parenOpen++;
+        return openParen;
+    }
+
+    if(**fptr == ')'){
+        (*fptr)++;
+        parenClose++;
+        return closeParen;
+    }
+
+    if(**fptr == '['){
+        (*fptr)++;
+        brackOpen++;
+        return openBrack;
+    }
+
+    if(**fptr == ']'){
+        (*fptr)++;
+        brackClose++;
+        return closeBrack;
+    }
+    (*fptr)++;
+    printf("MACHINE NOT RECOGNIZED CATCHALL\n");
+    return unrec;
 }
 
 
@@ -358,28 +456,38 @@ struct Lexeme catchallM(char **fptr,char **bptr){
 
 
 
-
-int main(){
+//this main is a tester function to check if the machins are working
+/* Multi Line comment to disable main
+int main(void){
     char buffer[72];
     char *fptr = buffer;
     char *bptr = buffer;
     FILE *input = fopen("todo.txt","r");
-    head = reswordSetup();
+    head = createNode(0,"",0);
+    createTable(head);
+    traverseList(head);
 
 
 //process till EOF
     while(fgets(buffer,sizeof(buffer),input) != NULL){
         fptr=buffer;
         bptr=buffer;
-        printf("current buffer line: %s\n", buffer);
+
 
         while(whiteSpace(&fptr,&bptr).attr.val != WSPACE_NL){
-            relop(&fptr,&bptr);
-            idres(&fptr,&bptr);
-            realM(&fptr,&bptr);
-            intM(&fptr,&bptr);
+            printf("fptr: %c\n", *fptr);
+
+            if(relop(&fptr,&bptr).tkn != MN.tkn) {continue;}
+            if(idres(&fptr,&bptr).tkn != MN.tkn) {continue;}
+            if(realM(&fptr,&bptr).tkn != MN.tkn) {continue;}
+            if(intM(&fptr,&bptr).tkn != MN.tkn) {continue;}
+            if(catchallM(&fptr,&bptr).tkn != MN.tkn) {continue;}
+            
         }
 
     }
     return 0;
 }
+*/
+
+#endif

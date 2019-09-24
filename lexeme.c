@@ -1,3 +1,6 @@
+#ifndef LEXEME_H
+#define LEXEME_H
+
 #define MNOTREC       49
 #define PROGRAM       50
 #define VAR		      51
@@ -6,9 +9,9 @@
 #define OF            54
 #define INTEGER       55
 #define REAL          56
-#define LONGREAL      57
+#define LONGREAL      57 //not useful
 #define FUNCTION      58
-#define PROCEDURE     59
+#define PROCEDURE     59 //not useful
 #define BEGIN         60
 #define END           61
 #define ASSIGNOP      62
@@ -27,27 +30,32 @@
 #define MULOP_ML      0
 #define MULOP_DVF     1
 #define MULOP_DVI     2
-#define MULOP_MOD      3
-#define MULOP_AND      4
+#define MULOP_MOD     3
+#define MULOP_AND     4
 #define WSPACE        66
 #define WSPACE_BL     0
 #define WSPACE_TB     1
 #define WSPACE_NL     2
-#define LEXERROR      67
+#define IF            67
+#define THEN          68
+#define ELSE          69
+#define WHILE         70
+#define DO            71
+#define NOT           72
+#define DOTDOT        73
+#define DOT           74
+#define PAREN         75
+#define PAREN_OPEN    0
+#define PAREN_CLOSE   1
+#define BRACK         76
+#define BRACK_OPEN    0
+#define BRACK_CLOSE   1
+#define LEXERROR      77
 #define IDTOOLONG     0
 #define INTTOOLONG    1
 #define REALTOOLONG   2
 #define LEADINGZERO   3
 #define UNKNOWNSYMBOL 4
-#define IF            68
-#define THEN          69
-#define ELSE          70
-#define WHILE         71
-#define DO            72
-#define NOT           73
-#define DOTDOT        74
-#define DOT           75
-
 
 
 
@@ -64,3 +72,5 @@ struct Lexeme getLexeme(int lexeme){
     struct Lexeme tmp = {100, {1000} };
     return tmp;
 }
+
+#endif

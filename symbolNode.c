@@ -1,3 +1,6 @@
+#ifndef SYMBOLNODE_H
+#define SYMBOLNODE_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,13 +11,14 @@ this will be the data structure and functionality used to work the symboltable
 
 struct symbolNode{
     int tkn;
+    int attr;
     struct symbolNode *next;
     char name[];
 };
 
 typedef struct symbolNode *symbolNode;
 
-symbolNode createNode(int tkn, char name[]){
+symbolNode createNode(int tkn, char name[],int attr){
     symbolNode newNode = (symbolNode)malloc(sizeof(symbolNode) + sizeof(char[strlen(name)]));
 
     int counter = 0;
@@ -24,15 +28,16 @@ symbolNode createNode(int tkn, char name[]){
     }
     newNode->name[counter] = '\0';
     newNode->tkn = tkn;
+    newNode->attr = attr;
     newNode->next = NULL;
     //printf("node name: %s\n", newNode->name);
     return newNode;
 }
 
-symbolNode addNode(symbolNode head, int tkn, char name[]){
+symbolNode addNode(symbolNode head, int tkn, char name[],int attr){
     symbolNode temp = (symbolNode)malloc(sizeof(symbolNode) + sizeof(char[strlen(name)]));
-    symbolNode p = (symbolNode)malloc(sizeof(symbolNode) + sizeof(char[strlen(name)]));
-    temp = createNode(tkn,name);//this will be added to the back of the list
+    symbolNode p;//= (symbolNode)malloc(sizeof(symbolNode) + sizeof(char[strlen(name)]));
+    temp = createNode(tkn,name,attr);//this will be added to the back of the list
     if(head == NULL){
         head = temp;
     }
@@ -44,6 +49,16 @@ symbolNode addNode(symbolNode head, int tkn, char name[]){
         p->next = temp;
     }
     return head;
+}
+
+void traverseList(symbolNode head){
+    symbolNode p;
+    p = head;
+    while(p->next != NULL){
+        printf("name: %s\n", p->name);
+        p = p->next;
+    }
+    printf("name: %s\n", p->name);
 }
 
 
@@ -70,8 +85,8 @@ int isResword(symbolNode head,char name[]){
 
 
 symbolNode reswordSetup(void){
-    symbolNode head = createNode(0,"temp");
-    addNode(head,50,"program");
+    symbolNode head = createNode(0,"temp",0);
+    /*addNode(head,50,"program");
     addNode(head,51,"var");
     addNode(head,53,"array");
     addNode(head,54,"of");
@@ -85,6 +100,8 @@ symbolNode reswordSetup(void){
     addNode(head,70,"else");
     addNode(head,71,"while");
     addNode(head,72,"do");
-    addNode(head,73,"not");
+    addNode(head,73,"not"); */
     return head;
 }
+
+#endif
