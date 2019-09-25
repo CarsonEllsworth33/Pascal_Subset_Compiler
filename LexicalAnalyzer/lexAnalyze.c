@@ -13,15 +13,17 @@
 #include "../symbolNode.c"
 
 
-symbolNode head;
+symbolNode restable;
+symbolNode idtable;
 
 void read_print_line(FILE *input, FILE *output){
     //file and output should be two open files upon the function call
     char buffer[72];
     char *fptr=buffer;
     char *bptr=buffer;
-    head = reswordSetup();
-    createTable(head);
+    restable = headNodeSetup();
+    idtable = headNodeSetup();
+    createTable(restable);
 
     if(input == NULL || output == NULL){
         printf("File not opened\n");
@@ -43,7 +45,7 @@ void read_print_line(FILE *input, FILE *output){
                 if(relopLM.tkn != MNOTREC) {
                     continue;
                 }
-                struct Lexeme idLM = idres(&fptr,&bptr,head);
+                struct Lexeme idLM = idres(&fptr,&bptr,restable,idtable);
                 if(idLM.tkn != MNOTREC) {
                     continue;
                 }

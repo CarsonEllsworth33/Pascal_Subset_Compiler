@@ -19,6 +19,7 @@ int main() {
 	fclose(file);
 	fclose(line);
 
+
 	struct Lexeme tmp = getLexeme(10);
 	printf("getLexeme tkn: %d\ngetLexeme attr: %d\n",tmp.tkn,tmp.attr.val);
 	return 0;

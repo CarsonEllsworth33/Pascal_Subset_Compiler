@@ -84,7 +84,7 @@ int isResword(symbolNode head,char name[]){
 }
 
 
-symbolNode reswordSetup(void){
+symbolNode headNodeSetup(void){
     symbolNode head = createNode(0,"temp",0);
     return head;
 }

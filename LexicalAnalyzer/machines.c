@@ -135,7 +135,7 @@ int match(char fptr, char compArr[],int arrlen){
 
 
 
-struct Lexeme idres(char **fptr, char **bptr, symbolNode head){
+struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode idtable){
     //const char* letter = "[a-zA-Z]";
     //user defined letter and digit alphabet
     /* RESERVED WORDS
@@ -183,10 +183,10 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode head){
             }
 
             string[counter] = '\0';
-            int result = isResword(head,string);
+            int result = isResword(restable,string);
             if( result == 0){
                 //good to add to symbolNode list
-                addNode(head,ID,string,0);//this last value should be a pointer
+                addNode(idtable,ID,string,0);//this last value should be a pointer
             }
 
             else{
