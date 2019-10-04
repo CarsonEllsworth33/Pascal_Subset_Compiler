@@ -5,18 +5,18 @@
 #include <stdio.h>
 #include "../symbolNode.c"
 
-symbolNode resTable;
-
 void createTable(symbolNode head){
-    FILE *input = fopen("reservedword.txt","r");
+    //the cwd is where run is executed from!!!!
+    FILE *in = fopen("textfiles/reservedword.txt","r");
     char buffer[72];
     char *fptr = buffer;
     char *bptr = buffer;
-    if(input == NULL){
+    printf("in: %p\n", in);
+    if(in == NULL){
         printf("file not opened\n");
     }
     else{
-        while( fgets(buffer, sizeof(buffer),input) != NULL){
+        while( fgets(buffer, sizeof(buffer),in) != NULL){
             //go through the file line by line
             int tkn = 0;
             int attr = 0;
@@ -43,10 +43,12 @@ void createTable(symbolNode head){
                     fptr++;
                 }//end NL while
 
-                //printf("elements 0:%s elements 1:%s elements 2:%s\n", elements[0] , elements[1], elements[2]);
                 char tmp[] = {'N','U','L','L'};
                 if(strcmp(elements[0],tmp) != 0){
-                    addNode(head,(int)elements[1],elements[0],(int)elements[2]);
+                    int i = atoi(elements[1]);
+                    int j = atoi(elements[2]);
+                    printf("name: %s ||tkn: %d ||attr: %d\n",elements[0],i,j);
+                    addNode(head, elements[0], NULL, i, j);
                 }
                 for(int i = 0; i < 5; i++){
                     switch(i){
@@ -75,13 +77,12 @@ void createTable(symbolNode head){
 
         }//end buffer grab while
     }//end else
+    if(fclose(in) == 0){
+        //printf("yay success\n");
+    }
+    else{
+        printf("booo\n");
+    }
 }
-
-/*
-int main(void){
-    resTable = createNode(0,"",0);
-    createTable(resTable);
-    return 0;
-}*/
 
 #endif

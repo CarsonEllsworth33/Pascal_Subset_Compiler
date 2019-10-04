@@ -2,9 +2,9 @@
 #define RUN_H
 
 #include <stdio.h>
+#include "lexeme.c"
 #include "symbolNode.c"
 #include "LexicalAnalyzer/lexAnalyze.c"
-#include "lexeme.c"
 
 
 
@@ -12,13 +12,19 @@ int main() {
 
 	//char buffer[72];
 	FILE *file = fopen("textfiles/program.txt", "r");
-	FILE *line = fopen("textfiles/listing.txt","w");
+	FILE *list = fopen("textfiles/listing.txt","w");
+	FILE *token = fopen("textfiles/token.txt","w");
 
-	read_print_line(file,line);
+	if(file != NULL){
+		read_print_line(file,list,token);
+	}
+	else{
+		printf("program.txt file not found\n");
+	}
 
 	fclose(file);
-	fclose(line);
-
+	fclose(list);
+	fclose(token);
 
 	struct Lexeme tmp = getLexeme(10);
 	printf("getLexeme tkn: %d\ngetLexeme attr: %d\n",tmp.tkn,tmp.attr.val);

@@ -42,7 +42,7 @@ struct Lexeme whiteSpace(char **fptr,char **bptr){
     }
 
     //*bptr = *fptr; //could be source of problem
-    printf("MACHINE NOT RECOGNIZED WS\n");
+    //printf("MACHINE NOT RECOGNIZED WS\n");
     return MN;
 }//END WHITESPACE MACHINE
 
@@ -109,7 +109,7 @@ struct Lexeme relop(char **fptr,char **bptr){
         return EQ;
     }
     *bptr = *fptr;
-    printf("MACHINE NOT RECOGNIZED RELOP\n");
+    //printf("MACHINE NOT RECOGNIZED RELOP\n");
     return MN;
 }//END RELOP MACHINE
 
@@ -155,11 +155,11 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
     not
     */
 
-    struct Lexeme idtl = {LEXERROR,IDTOOLONG};
+    struct Lexeme idtl;
     struct Lexeme id = {ID,0};//0 is tmp value, this actually needs to be a pointer
-
+    idtl.tkn = LEXERROR;
+    idtl.attr.val = IDTOOLONG;
     int counter = 0;//counter to make hard things simple
-
     if(match(**fptr,letter,letterSize)){
         //**fptr is a letter
         //(*fptr)++;//buffer address pointer
@@ -183,20 +183,34 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
             }
 
             string[counter] = '\0';
-            int result = isResword(restable,string);
-            if( result == 0){
-                //good to add to symbolNode list
-                addNode(idtable,ID,string,0);//this last value should be a pointer
+            symbolNode result = isWord(restable,string);
+            if( result == NULL){
+                //not a resword
+                result = isWord(idtable,string);
+                if( result == NULL){
+                    //not a resword or a id word, so it can be added as a new node
+                    //this last value should be a pointer to the id table
+                    addNode(idtable,string,idtable,ID,0);
+                    result = isWord(idtable,string);
+                    if( result != NULL){
+                        return *result->lex;
+                    }
+                    else{
+                        printf("ERROR returning result->lex\n");
+                    }
+                }
+                else{
+                    //not resword but is an existing identifier
+                    return *result->lex;
+                }
             }
-
             else{
-                printf("already existing identifier: %s\n", string);
+                //this is a resword
+                return *result->lex;
             }
-            printf("identifier: %s\n", string );
-            return id;
         }
     }
-    printf("MACHINE NOT RECOGNIZED IDRES\n");
+    //printf("MACHINE NOT RECOGNIZED IDRES\n");
     return MN;
 }
 
@@ -205,9 +219,10 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
 
 
 struct Lexeme realM(char **fptr, char **bptr){
-    struct Lexeme realData = {INTEGER};
+    struct Lexeme realData = {REAL};
     realData.attr.ptr = NULL;
-    struct Lexeme realerr = {LEXERROR,{REALTOOLONG}};
+    struct Lexeme realerr;
+    realerr.tkn = LEXERROR;
     int rcounter = 0;
     int fcounter = 0;
     int ecounter = 0;
@@ -236,28 +251,26 @@ struct Lexeme realM(char **fptr, char **bptr){
         }
         else{
             (*fptr) = (*bptr);
-            printf("MACHINE NOT RECOGNIZED REALM\n");
+            //printf("MACHINE NOT RECOGNIZED REALM\n");
             return MN;
         }
 
         if(fcounter > 5){
             printf("REALFRONTTOOLONG\n");
+            realerr.attr.val = REALFTOOLONG;
             return realerr;//real front too long
         }
 
         if(rcounter > 5){
             printf("REALBACKTOOLONG\n");
+            realerr.attr.val = REALBTOOLONG;
             return realerr;
         }
 
         if(ecounter > 2){
             printf("REALEXPONENTTOOBIG\n");
+            realerr.attr.val = REALETOOLONG;
             return realerr;
-        }
-
-        if(fcounter+rcounter > 10){
-            printf("REALTOOLONG\n");
-            return realerr;//real too long
         }
         int counter = fcounter + rcounter + ecounter + epresent;
 
@@ -306,7 +319,7 @@ struct Lexeme intM(char **fptr, char **bptr){
         printf("Int: %s\n", intstr);
         return intData;
     }
-    printf("MACHINE NOT RECOGNIZED INT\n");
+    //printf("MACHINE NOT RECOGNIZED INT\n");
     return MN;
 }
 
@@ -321,13 +334,27 @@ struct Lexeme catchallM(char **fptr,char **bptr){
     //and handle any unrecognized symbol
     //div mod and or are all going to be recognized by the
 
-    //incomplete: missing symbols to catch
-    // , ; :
+    /*
+    incomplete features:
+    watching for mismatch count
+    of paren and brackets
+    */
 
-    //incomplete features: watching for mismatch count of paren and brackets
     struct Lexeme plus;
     plus.tkn = ADDOP;
     plus.attr.val = ADDOP_PL;
+
+    struct Lexeme comma;
+    comma.tkn = COMMA;
+    comma.attr.val = 0;
+
+    struct Lexeme colon;
+    colon.tkn = COLON;
+    colon.attr.val = 0;
+
+    struct Lexeme semicolon;
+    semicolon.tkn = SEMICOLON;
+    semicolon.attr.val = 0;
 
     struct Lexeme minus;
     minus.tkn = ADDOP;
@@ -345,7 +372,7 @@ struct Lexeme catchallM(char **fptr,char **bptr){
     divF.tkn = MULOP;
     divF.attr.val = MULOP_DVF;
 
-    /*struct Lexeme mod;
+    /*struct Lexeme mod; // this is keyword mod
     mod.tkn = MULOP;
     mod.attr.val = MULOP_MOD;*/
 
@@ -386,9 +413,11 @@ struct Lexeme catchallM(char **fptr,char **bptr){
         (*fptr)++;
         if(**fptr == '.'){
             (*fptr)++;
+            *bptr = *fptr;
             return dotdot;
         }
         else{
+            *bptr = *fptr;
             return dot;
         }
     }
@@ -396,105 +425,84 @@ struct Lexeme catchallM(char **fptr,char **bptr){
     if(**fptr == ':'){
         (*fptr)++;
         if(**fptr == '='){
+            (*fptr)++;
             printf("assignop returned\n" );
+            *bptr = *fptr;
             return assign;
         }
         else{
-            //unrecognized symbol
-            return unrec;
+            *bptr = *fptr;
+            return colon;
         }
+    }
+
+    if(**fptr == ','){
+        (*fptr)++;
+        *bptr = *fptr;
+        return comma;
+    }
+
+    if(**fptr == ';'){
+        (*fptr)++;
+        *bptr = *fptr;
+        return semicolon;
     }
 
     if(**fptr == '*'){
         (*fptr)++;
+        *bptr = *fptr;
         return times;
     }
 
     if(**fptr == '/'){
         (*fptr)++;
+        *bptr = *fptr;
         return divF;
     }
 
     if(**fptr == '+'){
         (*fptr)++;
+        *bptr = *fptr;
         return plus;
     }
 
     if(**fptr == '-'){
         (*fptr)++;
+        *bptr = *fptr;
         return minus;
     }
 
     if(**fptr == '('){
         (*fptr)++;
         parenOpen++;
+        *bptr = *fptr;
         return openParen;
     }
 
     if(**fptr == ')'){
         (*fptr)++;
         parenClose++;
+        *bptr = *fptr;
         return closeParen;
     }
 
     if(**fptr == '['){
         (*fptr)++;
         brackOpen++;
+        *bptr = *fptr;
         return openBrack;
     }
 
     if(**fptr == ']'){
         (*fptr)++;
         brackClose++;
+        *bptr = *fptr;
         return closeBrack;
     }
     (*fptr)++;
-    printf("MACHINE NOT RECOGNIZED CATCHALL\n");
+    //printf("MACHINE NOT RECOGNIZED CATCHALL\n");
+    *bptr = *fptr;
     return unrec;
 }
-
-
-//these might fit better in the catch all machine
-//
-
-
-
-
-
-
-
-//this main is a tester function to check if the machins are working
-/* Multi Line comment to disable main
-int main(void){
-    char buffer[72];
-    char *fptr = buffer;
-    char *bptr = buffer;
-    FILE *input = fopen("todo.txt","r");
-    head = createNode(0,"",0);
-    createTable(head);
-    traverseList(head);
-
-
-//process till EOF
-    while(fgets(buffer,sizeof(buffer),input) != NULL){
-        fptr=buffer;
-        bptr=buffer;
-
-
-        while(whiteSpace(&fptr,&bptr).attr.val != WSPACE_NL){
-            printf("fptr: %c\n", *fptr);
-
-            if(relop(&fptr,&bptr).tkn != MN.tkn) {continue;}
-            if(idres(&fptr,&bptr).tkn != MN.tkn) {continue;}
-            if(realM(&fptr,&bptr).tkn != MN.tkn) {continue;}
-            if(intM(&fptr,&bptr).tkn != MN.tkn) {continue;}
-            if(catchallM(&fptr,&bptr).tkn != MN.tkn) {continue;}
-
-        }
-
-    }
-    return 0;
-}
-*/
 
 #endif

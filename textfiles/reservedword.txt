@@ -17,7 +17,8 @@ else 70 0 ;
 while 71 0 ;
 do 72 0 ;
 not 73 0 ;
-
 /to include new reserved words in the table follow the format of
-/<name> <tkn> <attr> ;
+/  <name> <tkn> <attr> ;
 /make sure there are spaces between each word
+/to include comments make sure the first character of the line
+/is a </>

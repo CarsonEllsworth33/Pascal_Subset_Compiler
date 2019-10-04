@@ -4,40 +4,51 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "lexeme.c"
+
 /*
 this will be the data structure and functionality used to work the symboltable
 
 */
 
 struct symbolNode{
-    int tkn;
-    int attr;
+    //int tkn;
+    struct Lexeme *lex;
+    //struct symbolNode *tbl;
     struct symbolNode *next;
     char name[];
 };
 
 typedef struct symbolNode *symbolNode;
+typedef struct Lexeme *Lex;
 
-symbolNode createNode(int tkn, char name[],int attr){
+symbolNode createNode(Lex lex/*int tkn*/, char name[]/*,symbolNode tbl*/){
     symbolNode newNode = (symbolNode)malloc(sizeof(symbolNode) + sizeof(char[strlen(name)]));
-
     int counter = 0;
     for(int i =0; i < strlen(name); i++){
         newNode->name[i]=name[i];
         counter++;
     }
     newNode->name[counter] = '\0';
-    newNode->tkn = tkn;
-    newNode->attr = attr;
+    //newNode->tkn = tkn;
+    newNode->lex = lex;
+    //newNode->tbl = NULL;
     newNode->next = NULL;
-    //printf("node name: %s\n", newNode->name);
     return newNode;
 }
 
-symbolNode addNode(symbolNode head, int tkn, char name[],int attr){
+symbolNode addNode(symbolNode head, char name[],symbolNode tbl, int tkn, int attr){
     symbolNode temp = (symbolNode)malloc(sizeof(symbolNode) + sizeof(char[strlen(name)]));
     symbolNode p;//= (symbolNode)malloc(sizeof(symbolNode) + sizeof(char[strlen(name)]));
-    temp = createNode(tkn,name,attr);//this will be added to the back of the list
+    Lex l = (Lex)malloc(sizeof(Lex));
+    l->tkn = tkn;
+    if(tbl == NULL){
+        l->attr.val = attr;
+    }
+    else{
+        l->attr.ptr = tbl;
+    }
+    temp = createNode(l,name);//this will be added to the back of the list
     if(head == NULL){
         head = temp;
     }
@@ -55,15 +66,21 @@ void traverseList(symbolNode head){
     symbolNode p;
     p = head;
     while(p->next != NULL){
-        printf("name: %s\n", p->name);
+        if(p->lex == NULL){}
+        else{
+            printf("name: %s ||Lex->tkn: %d\n", p->name,p->lex->tkn);
+        }
         p = p->next;
     }
-    printf("name: %s\n", p->name);
+    if(p->lex == NULL){}
+    else{
+        printf("name: %s ||Lex->tkn: %d\n", p->name,p->lex->tkn);
+    }
 }
 
 
 
-int isResword(symbolNode head,char name[]){
+symbolNode isWord(symbolNode head,char name[]){
     //go through and find the node with the string matching name
     symbolNode curNode = head;
     int result;
@@ -71,22 +88,16 @@ int isResword(symbolNode head,char name[]){
         result = strcmp(curNode->name,name);
         if(result == 0){
             //found node, this means a new node cannot be added
-            return 1;
+            return curNode;
         }
         curNode = curNode->next;
     }
     result = strcmp(curNode->name,name);
     if(result == 0){
         //found node, this means a new node cannot be added
-        return 1;
+        return curNode;
     }
-    return 0; //node with name name not found, therefore it is a valid node to add
-}
-
-
-symbolNode headNodeSetup(void){
-    symbolNode head = createNode(0,"temp",0);
-    return head;
+    return NULL; //node with name name not found, therefore it is a valid node to add
 }
 
 #endif

@@ -53,20 +53,25 @@
 #define LEXERROR      77
 #define IDTOOLONG     0
 #define INTTOOLONG    1
-#define REALTOOLONG   2
-#define LEADINGZERO   3
-#define UNKNOWNSYMBOL 4
-
-
+#define REALFTOOLONG  2
+#define REALBTOOLONG  3
+#define REALETOOLONG  4
+#define LEADINGZERO   5
+#define UNKNOWNSYMBOL 6
+#define COMMA         78
+#define SEMICOLON     79
+#define COLON         80
 
 struct Lexeme
 {
 int tkn;
 union {
     int val;
-    char *ptr;//will be used for ID symbol table pointing
+    void *ptr;//will be used for ID symbol table pointing
     } attr;
 };
+
+typedef struct Lexeme *Lex;
 
 struct Lexeme getLexeme(int lexeme){
     struct Lexeme tmp = {100, {1000} };

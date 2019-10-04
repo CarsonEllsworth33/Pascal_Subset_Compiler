@@ -1,26 +1,12 @@
 1    program example(input, output);
-LEXERR:    Unrecognized Symbol:    ,
-LEXERR:    Unrecognized Symbol:    ;
 2    var x, y: integer;
-LEXERR:    Unrecognized Symbol:    ,
-LEXERR:    Unrecognized Symbol:    :
-LEXERR:    Unrecognized Symbol:    ;
 3    function gcd(a, b: integer): integer;
-LEXERR:    Unrecognized Symbol:    ,
-LEXERR:    Unrecognized Symbol:    :
-LEXERR:    Unrecognized Symbol:    :
-LEXERR:    Unrecognized Symbol:    ;
 4    begin
 5    	if b = 0 then gcd := a
 6    	else gcd := gcd(b, a mod b)
-LEXERR:    Unrecognized Symbol:    ,
 7    end;
-LEXERR:    Unrecognized Symbol:    ;
 8    
 9    begin
 10    	read(x, y);
-LEXERR:    Unrecognized Symbol:    ,
-LEXERR:    Unrecognized Symbol:    ;
 11    	write(gcd(x, y))
-LEXERR:    Unrecognized Symbol:    ,
 12    end.
