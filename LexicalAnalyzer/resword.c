@@ -11,7 +11,6 @@ void createTable(symbolNode head){
     char buffer[72];
     char *fptr = buffer;
     char *bptr = buffer;
-    printf("in: %p\n", in);
     if(in == NULL){
         printf("file not opened\n");
     }
@@ -47,27 +46,9 @@ void createTable(symbolNode head){
                 if(strcmp(elements[0],tmp) != 0){
                     int i = atoi(elements[1]);
                     int j = atoi(elements[2]);
-                    printf("name: %s ||tkn: %d ||attr: %d\n",elements[0],i,j);
                     addNode(head, elements[0], NULL, i, j);
                 }
-                for(int i = 0; i < 5; i++){
-                    switch(i){
-                        case 0:
-                            elements[0][i] = 'N';
-                            break;
-                        case 1:
-                            elements[0][i] = 'U';
-                            break;
-                        case 2: case 3:
-                            elements[0][i] = 'L';
-                            break;
-                        case 4:
-                            elements[0][i] = '\0';
-                            break;
-                        default:
-                            break;
-                    }
-                }
+                strcpy(elements[0],"NULL");
 
             }//end comment catch line
 

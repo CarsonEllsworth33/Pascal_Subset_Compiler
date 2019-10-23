@@ -8,7 +8,6 @@
 #include "../symbolNode.c"
 #include "resword.c"
 
-struct Lexeme MN = {MNOTREC,{MNOTREC}};
 char letter[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 char digit[] = {'0','1','2','3','4','5','6','7','8','9'};
 int letterSize = sizeof(letter);
@@ -17,12 +16,32 @@ int parenOpen = 0;
 int parenClose = 0;
 int brackOpen = 0;
 int brackClose = 0;
+
+struct Lexeme MN = {MNOTREC,"",{0}};
+//MN.tkn = MNOTREC;
+//MN.attr.val = MNOTREC;
 //symbolNode head = reswordSetup();
 
 struct Lexeme whiteSpace(char **fptr,char **bptr){
-    struct Lexeme NL = {WSPACE, {WSPACE_NL}};
-    struct Lexeme BL = {WSPACE, {WSPACE_BL}};
-    struct Lexeme TB = {WSPACE, {WSPACE_TB}};
+    struct Lexeme NL;
+    NL.tkn = WSPACE;
+    NL.attr.val = WSPACE_NL;
+    struct Lexeme BL;
+    BL.tkn = WSPACE;
+    BL.attr.val = WSPACE_BL;
+    struct Lexeme TB;
+    TB.tkn = WSPACE;
+    TB.attr.val = WSPACE_TB;
+    struct Lexeme PE;
+    PE.tkn = LEXERROR;
+    PE.attr.val = PARENMISMATCH;
+    struct Lexeme BE;
+    BE.tkn = LEXERROR;
+    BE.attr.val = BRACKMISMATCH;
+
+
+
+
 
     while(**fptr == ' '){
         //stay in loop and advance till item seen
@@ -37,7 +56,6 @@ struct Lexeme whiteSpace(char **fptr,char **bptr){
 
     if(**fptr == '\n'){
         //get newline
-        printf("NL returned\n");
         return NL;
     }
 
@@ -55,57 +73,79 @@ struct Lexeme whiteSpace(char **fptr,char **bptr){
 
 
 struct Lexeme relop(char **fptr,char **bptr){
-    struct Lexeme LT = {RELOP, {RELOP_LT}};
-    struct Lexeme LE = {RELOP, {RELOP_LE}};
-    struct Lexeme GT = {RELOP, {RELOP_GT}};
-    struct Lexeme GE = {RELOP, {RELOP_GE}};
-    struct Lexeme EQ = {RELOP, {RELOP_EQ}};
-    struct Lexeme NE = {RELOP, {RELOP_NE}};
+    struct Lexeme LT;
+    LT.tkn = RELOP;
+    LT.attr.val = RELOP_LT;
+    struct Lexeme LE;
+    LE.tkn = RELOP;
+    LE.attr.val = RELOP_LE;
+    struct Lexeme GT;
+    GT.tkn = RELOP;
+    GT.attr.val = RELOP_GT;
+    struct Lexeme GE;
+    GE.tkn = RELOP;
+    GE.attr.val = RELOP_GE;
+    struct Lexeme EQ;
+    EQ.tkn = RELOP;
+    EQ.attr.val = RELOP_EQ;
+    struct Lexeme NE;
+    NE.tkn = RELOP;
+    NE.attr.val = RELOP_NE;
 
     //this tree takes us to LT,LE,NE
     if(**fptr == '<'){
+        LT.word[0] = '<';
+        LE.word[0] = '<';
+        NE.word[0] = '<';
             (*fptr)++;
             if(**fptr == '='){
+                LE.word[1]='=';
+                LE.word[2]='\0';
                 (*fptr)++;
                 *bptr = *fptr;
-                printf("Less than or equal returned\n");
                 return LE;
             }
             else if(**fptr == '>'){
+                NE.word[1]='>';
+                NE.word[2]='\0';
                 (*fptr)++;
                 *bptr = *fptr;
-                printf("Not Equal returned\n");
                 return NE;
             }
             else{
-                //(*fptr)++;
+                LT.word[1]='\0';
                 *bptr = *fptr;
-                printf("Less than returned\n");
                 return LT;
             }
     }
 
     //this tree takes us to GT,GE
     if(**fptr == '>'){
+        GT.word[0]='>';
+        GE.word[0]='>';
             (*fptr)++;
             if(**fptr == '='){
+                GE.word[1]='=';
+                GE.word[2]='\0';
                 (*fptr)++;
                 *bptr = *fptr;
-                printf("Greater than or Equal returned\n");
+                //printf("Greater than or Equal returned\n");
                 return GE;
             }
             else{
+                GT.word[1]='\0';
                 *bptr = *fptr;
-                printf("Greater than returned\n");
+                //printf("Greater than returned\n");
                 return GT;
             }
     }
 
     //this tree takes us to EQ
     if(**fptr == '='){
+        EQ.word[0] = '=';
+        EQ.word[1]='\0';
         (*fptr)++;
         *bptr = *fptr;
-        printf("Equal returned\n");
         return EQ;
     }
     *bptr = *fptr;
@@ -156,9 +196,13 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
     */
 
     struct Lexeme idtl;
-    struct Lexeme id = {ID,0};//0 is tmp value, this actually needs to be a pointer
     idtl.tkn = LEXERROR;
     idtl.attr.val = IDTOOLONG;
+
+    struct Lexeme id;//0 is tmp value, this actually needs to be a pointer
+    id.tkn = ID;
+    id.attr.val = 0;
+
     int counter = 0;//counter to make hard things simple
     if(match(**fptr,letter,letterSize)){
         //**fptr is a letter
@@ -170,29 +214,42 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
         }
         //checks to see if the created string would be too long
         if(counter > 0){
-            if(counter > 10){
-                printf("IDTOOLONG\n");
-                *bptr = *fptr;
-                return idtl;
-            }
+
             //while MNOTREC and is less than 10
             char string[counter+1];//temp string to build up identifiers
             for(int i = 0; i <= counter; i++){
                 string[i] = **bptr;
                 (*bptr)++;
             }
-
             string[counter] = '\0';
+
+            if(counter > 10){
+                //printf("IDTOOLONG\n");
+                *bptr = *fptr;
+                if(counter > 14){
+                    for(int i = 0; i < 14; i++){
+                        idtl.word[i]=string[i];
+                    }
+                    idtl.word[11]='.';
+                    idtl.word[12]='.';
+                    idtl.word[13]='.';
+                    idtl.word[14]='\0';
+                    return idtl;
+                }
+                strcpy(idtl.word,string);
+                return idtl;
+            }
+
             symbolNode result = isWord(restable,string);
             if( result == NULL){
                 //not a resword
                 result = isWord(idtable,string);
                 if( result == NULL){
                     //not a resword or a id word, so it can be added as a new node
-                    //this last value should be a pointer to the id table
                     addNode(idtable,string,idtable,ID,0);
                     result = isWord(idtable,string);
                     if( result != NULL){
+                        //this is if the word is already in the table
                         return *result->lex;
                     }
                     else{
@@ -219,14 +276,17 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
 
 
 struct Lexeme realM(char **fptr, char **bptr){
-    struct Lexeme realData = {REAL};
-    realData.attr.ptr = NULL;
+    struct Lexeme realData;
+    realData.tkn = REAL;
+    realData.attr.val = 0;;
     struct Lexeme realerr;
     realerr.tkn = LEXERROR;
+
     int rcounter = 0;
     int fcounter = 0;
     int ecounter = 0;
     int epresent = 0;
+
     while(match(**fptr,digit,digitSize)){
         (*fptr)++;
         fcounter++;
@@ -255,6 +315,28 @@ struct Lexeme realM(char **fptr, char **bptr){
             return MN;
         }
 
+        int counter = fcounter + rcounter + ecounter + epresent;
+
+        char realstr[counter + 1];//takes into account the dot and E if present
+        int strcntr = 0;
+        while(*bptr != *fptr){
+            realstr[strcntr] = **bptr;
+            (*bptr)++;
+            strcntr++;
+        }
+        realstr[strcntr] = '\0';
+        if(fcounter+rcounter+ecounter+epresent > 14){
+            for(int i = 0; i < 14; i++){
+                realerr.word[i]=realstr[i];
+                realerr.word[11]='.';
+                realerr.word[12]='.';
+                realerr.word[13]='.';
+                realerr.word[14]='\0';
+            }
+        }
+        else{
+            strcpy(realerr.word,realstr);
+        }
         if(fcounter > 5){
             printf("REALFRONTTOOLONG\n");
             realerr.attr.val = REALFTOOLONG;
@@ -272,17 +354,9 @@ struct Lexeme realM(char **fptr, char **bptr){
             realerr.attr.val = REALETOOLONG;
             return realerr;
         }
-        int counter = fcounter + rcounter + ecounter + epresent;
 
-        char realstr[counter + 1];//takes into account the dot and E if present
-        int strcntr = 0;
-        while(*bptr != *fptr){
-            realstr[strcntr] = **bptr;
-            (*bptr)++;
-            strcntr++;
-        }
-        realstr[strcntr] = '\0';
-        printf("real: %s\n", realstr);
+        //printf("real: %s\n", realstr);
+        strcpy(realData.word,realstr);
         return realData;
     }
     return MN;
@@ -294,9 +368,13 @@ struct Lexeme realM(char **fptr, char **bptr){
 
 
 struct Lexeme intM(char **fptr, char **bptr){
-    struct Lexeme intData = {INTEGER};
+    struct Lexeme intData;
+    intData.tkn = INTEGER;
     intData.attr.ptr = NULL;
-    struct Lexeme interr = {LEXERROR,{INTTOOLONG}};
+
+    struct Lexeme interr;
+    interr.tkn = LEXERROR;
+    interr.attr.val = INTTOOLONG;
 
     int counter = 0;
 
@@ -304,19 +382,32 @@ struct Lexeme intM(char **fptr, char **bptr){
         (*fptr)++;
         counter++;
     }
+    char intstr[counter + 1];
+    for(int i = 0; i <= counter; i++){
+        intstr[i] = **bptr;
+        (*bptr)++;
+    }
+    intstr[counter] = '\0';
+    if(counter > 14){
+        for(int i = 0;i<14;i++){
+            interr.word[i]=intstr[i];
+            interr.word[11]='.';
+            interr.word[12]='.';
+            interr.word[13]='.';
+            interr.word[14]='\0';
+        }
+    }
+    else{
+        strcpy(interr.word,intstr);
+    }
     if(counter > 10){
         printf("INTEGERTOOLONG\n");
-        *bptr = *fptr;
+        //*bptr = *fptr;
         return interr;//int too long
     }
     if(counter > 0){
-        char intstr[counter + 1];
-        for(int i = 0; i <= counter; i++){
-            intstr[i] = **bptr;
-            (*bptr)++;
-        }
-        intstr[counter] = '\0';
-        printf("Int: %s\n", intstr);
+        //printf("Int: %s\n", intstr);
+        strcpy(intData.word,intstr);
         return intData;
     }
     //printf("MACHINE NOT RECOGNIZED INT\n");
@@ -327,7 +418,7 @@ struct Lexeme intM(char **fptr, char **bptr){
 
 
 
-struct Lexeme catchallM(char **fptr,char **bptr){
+struct Lexeme catchallM(char **fptr,char **bptr, FILE *input){
     //Here we need to support addops(+ - or) mulops(* / div mod and)
     //assignop(:=) doubledot(..) dot(.)
     //parenthesis () and brackets [] need a counter for them
@@ -364,17 +455,9 @@ struct Lexeme catchallM(char **fptr,char **bptr){
     times.tkn = MULOP;
     times.attr.val = MULOP_ML;
 
-    /*struct Lexeme divI; // this is keyword div
-    divI.tkn = MULOP;
-    divI.attr.val = MULOP_DVI;*/
-
     struct Lexeme divF; // this is symbol: /
     divF.tkn = MULOP;
     divF.attr.val = MULOP_DVF;
-
-    /*struct Lexeme mod; // this is keyword mod
-    mod.tkn = MULOP;
-    mod.attr.val = MULOP_MOD;*/
 
     struct Lexeme assign;
     assign.tkn = ASSIGNOP;
@@ -404,102 +487,175 @@ struct Lexeme catchallM(char **fptr,char **bptr){
     closeBrack.tkn = BRACK;
     closeBrack.attr.val = BRACK_CLOSE;
 
+    struct Lexeme eoflex;
+    eoflex.tkn = EOF;
+    eoflex.attr.val = 0;
+
     struct Lexeme unrec;
     unrec.tkn = LEXERROR;
     unrec.attr.val = UNKNOWNSYMBOL;
 
+    struct Lexeme badparen;
+    badparen.tkn = LEXERROR;
+    badparen.attr.val = PARENMISMATCH;
+
+    struct Lexeme badbrack;
+    badbrack.tkn = LEXERROR;
+    badbrack.attr.val = BRACKMISMATCH;
 
     if(**fptr == '.'){
+        dot.word[0] = **fptr;
+        dotdot.word[0] = **fptr;
         (*fptr)++;
         if(**fptr == '.'){
+            dotdot.word[1] = **fptr;
+            dotdot.word[2] = '\0';
             (*fptr)++;
             *bptr = *fptr;
             return dotdot;
         }
         else{
+            dot.word[1] = '\0';
             *bptr = *fptr;
             return dot;
         }
     }
 
-    if(**fptr == ':'){
+    else if(**fptr == ':'){
+        colon.word[0] = **fptr;
+        assign.word[0] = **fptr;
         (*fptr)++;
         if(**fptr == '='){
+            assign.word[1] = **fptr;
+            assign.word[2] = '\0';
             (*fptr)++;
-            printf("assignop returned\n" );
+            //printf("assignop returned\n" );
             *bptr = *fptr;
             return assign;
         }
         else{
+            colon.word[1] = '\0';
             *bptr = *fptr;
             return colon;
         }
     }
 
-    if(**fptr == ','){
+    else if(**fptr == ','){
+        comma.word[0] = **fptr;
+        comma.word[1] = '\0';
         (*fptr)++;
         *bptr = *fptr;
         return comma;
     }
 
-    if(**fptr == ';'){
+    else if(**fptr == ';'){
+        semicolon.word[0] = **fptr;
+        semicolon.word[1] = '\0';
         (*fptr)++;
         *bptr = *fptr;
         return semicolon;
     }
 
-    if(**fptr == '*'){
+    else if(**fptr == '*'){
+        times.word[0] = **fptr;
+        times.word[1] = '\0';
         (*fptr)++;
         *bptr = *fptr;
         return times;
     }
 
-    if(**fptr == '/'){
+    else if(**fptr == '/'){
+        divF.word[0] = **fptr;
+        divF.word[1] = '\0';
         (*fptr)++;
         *bptr = *fptr;
         return divF;
     }
 
-    if(**fptr == '+'){
+    else if(**fptr == '+'){
+        plus.word[0] = **fptr;
+        plus.word[1] = '\0';
         (*fptr)++;
         *bptr = *fptr;
         return plus;
     }
 
-    if(**fptr == '-'){
+    else if(**fptr == '-'){
+        minus.word[0] = **fptr;
+        minus.word[1] = '\0';
         (*fptr)++;
         *bptr = *fptr;
         return minus;
     }
 
-    if(**fptr == '('){
+    else if(**fptr == '('){
+        openParen.word[0] = **fptr;
+        openParen.word[1] = '\0';
         (*fptr)++;
         parenOpen++;
         *bptr = *fptr;
+        /*
+        if(parenOpen < parenClose){
+            badparen.word[0] = *(*fptr - 1);
+            badparen.word[1] = '\0';
+            return badparen;
+        }
+        */
         return openParen;
     }
 
-    if(**fptr == ')'){
+    else if(**fptr == ')'){
+        closeParen.word[0] = **fptr;
+        closeParen.word[1] = '\0';
         (*fptr)++;
         parenClose++;
         *bptr = *fptr;
+        /*
+        if(parenOpen < parenClose){
+            badparen.word[0] = *(*fptr - 1);
+            badparen.word[1] = '\0';
+            return badparen;
+        }
+        */
         return closeParen;
     }
 
-    if(**fptr == '['){
+    else if(**fptr == '['){
+        openBrack.word[0] = **fptr;
+        openBrack.word[1] = '\0';
         (*fptr)++;
         brackOpen++;
         *bptr = *fptr;
+        /*
+        if(brackOpen < brackClose){
+            badbrack.word[0] = *(*fptr - 1);
+            badbrack.word[1] = '\0';
+            return badbrack;
+        }
+        */
         return openBrack;
     }
 
-    if(**fptr == ']'){
+    else if(**fptr == ']'){
+        closeBrack.word[0] = **fptr;
+        closeBrack.word[1] = '\0';
         (*fptr)++;
         brackClose++;
         *bptr = *fptr;
+        /*
+        if(brackOpen < brackClose){
+            badbrack.word[0] = *(*fptr - 1);
+            badbrack.word[1] = '\0';
+            return badbrack;
+        }
+        */
         return closeBrack;
     }
     (*fptr)++;
+
+    unrec.word[0] = *(*fptr - 1);
+    unrec.word[1] = '\0';
+
     //printf("MACHINE NOT RECOGNIZED CATCHALL\n");
     *bptr = *fptr;
     return unrec;

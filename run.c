@@ -8,10 +8,16 @@
 
 
 
-int main() {
-
-	//char buffer[72];
-	FILE *file = fopen("textfiles/program.txt", "r");
+int main(int argc, char *argv[]) {
+	FILE *file;
+	if(argc >= 2){
+		//grab file name from system args
+		printf("cla %s\n",argv[1]);
+		file = fopen(argv[1], "r");
+	}
+	else{
+		file = fopen("textfiles/program.txt", "r");
+	}
 	FILE *list = fopen("textfiles/listing.txt","w");
 	FILE *token = fopen("textfiles/token.txt","w");
 

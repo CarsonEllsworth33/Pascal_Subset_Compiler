@@ -1,6 +1,9 @@
 #ifndef LEXEME_H
 #define LEXEME_H
 
+#include <string.h>
+
+#define NOOP          48
 #define MNOTREC       49
 #define PROGRAM       50
 #define VAR		      51
@@ -58,6 +61,8 @@
 #define REALETOOLONG  4
 #define LEADINGZERO   5
 #define UNKNOWNSYMBOL 6
+#define PARENMISMATCH 7
+#define BRACKMISMATCH 8
 #define COMMA         78
 #define SEMICOLON     79
 #define COLON         80
@@ -65,6 +70,7 @@
 struct Lexeme
 {
 int tkn;
+char word[15];
 union {
     int val;
     void *ptr;//will be used for ID symbol table pointing
@@ -74,7 +80,10 @@ union {
 typedef struct Lexeme *Lex;
 
 struct Lexeme getLexeme(int lexeme){
-    struct Lexeme tmp = {100, {1000} };
+    struct Lexeme tmp;
+    tmp.tkn = 0;
+    strcpy(tmp.word,"yeet");
+    tmp.attr.val = 0;
     return tmp;
 }
 

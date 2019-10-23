@@ -1,12 +1,19 @@
-1    program example(input, output);
-2    var x, y: integer;
-3    function gcd(a, b: integer): integer;
-4    begin
-5    	if b = 0 then gcd := a
-6    	else gcd := gcd(b, a mod b)
-7    end;
-8    
-9    begin
-10    	read(x, y);
-11    	write(gcd(x, y))
-12    end.
+1    program ex();''
+LEXERR:      Unrecognized Symbol:    '
+LEXERR:      Unrecognized Symbol:    '
+2    var xxasdfasdf, b: real;
+3    Function123456 ::{}!@#$%^&*()
+LEXERR:     Identifier is greater than 10 characters Function123456
+LEXERR:      Unrecognized Symbol:    {
+LEXERR:      Unrecognized Symbol:    }
+LEXERR:      Unrecognized Symbol:    !
+LEXERR:      Unrecognized Symbol:    @
+LEXERR:      Unrecognized Symbol:    #
+LEXERR:      Unrecognized Symbol:    $
+LEXERR:      Unrecognized Symbol:    %
+LEXERR:      Unrecognized Symbol:    ^
+LEXERR:      Unrecognized Symbol:    &
+4    ffaldjfalksldfjlajsdl;kfjalksjdfljaslkdfjlkdddddkmdkdkklmdklmdkldklmdk
+LEXERR:     Identifier is greater than 10 characters ffaldjfalks...
+LEXERR:     Identifier is greater than 10 characters kfjalksjdfl...
+5    kldkl
