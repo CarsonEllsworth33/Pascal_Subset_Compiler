@@ -47,10 +47,12 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
             //this makes sure that a line greater than 70 characters will be broken up
             buffer[70]='\n';
             buffer[71]='\0';
-            printf("%s\n", buffer);
+
+            //set up pointers for buffer
             fptr=buffer;
             bptr=buffer;
             linecnt++;
+            
             //make listing file
             fprintf(listF,"%d    %s",linecnt,buffer);
 
