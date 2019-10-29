@@ -1,11 +1,8 @@
-1    program ex();''
-LEXERR:      Unrecognized Symbol:    '
-LEXERR:      Unrecognized Symbol:    '
-2    var xxasdfasdf, b: real;
-3    Function123456 ::{}!@#$%^&*()
-LEXERR:     Identifier is greater than 10 characters Function123456
-LEXERR:      Unrecognized Symbol:    {
-LEXERR:      Unrecognized Symbol:    }
+1    program example(input, output);
+2    var x, y: integer;
+3    function gcd(a, b: integer): integer;
+4    begin
+5    	if b !@#$%^& 100 then gcd := a
 LEXERR:      Unrecognized Symbol:    !
 LEXERR:      Unrecognized Symbol:    @
 LEXERR:      Unrecognized Symbol:    #
@@ -13,7 +10,21 @@ LEXERR:      Unrecognized Symbol:    $
 LEXERR:      Unrecognized Symbol:    %
 LEXERR:      Unrecognized Symbol:    ^
 LEXERR:      Unrecognized Symbol:    &
-4    ffaldjfalksldfjlajsdl;kfjalksjdfljaslkdfjlkdddddkmdkdkklmdklmdkldklmdk
-LEXERR:     Identifier is greater than 10 characters ffaldjfalks...
-LEXERR:     Identifier is greater than 10 characters kfjalksjdfl...
-5    kldkl
+6    	else gcd := gcd(b, a mod b);
+7    end;
+8    b:=10000000000000
+LEXERR:     Integer is greater than 10 digits: 10000000000000
+9    c:=1.22222E333
+LEXERR:     Real number exponent is greater than 2 digits: 1.22222E333
+10    e:=1.33333333
+LEXERR:     Real number back is greater than 5 digits: 1.33333333
+11    f:=1111111.03
+LEXERR:     Real number front is greater than 5 digits: 1111111.03
+12    g:=00001.0
+LEXERR:     Real number has leading zero: 00001.0
+13    h:=1.000
+LEXERR:     Real number has trailing zero: 1.000
+14    begin
+15    	read(x, y);
+16    	write(gcd(x, y))
+17    end.

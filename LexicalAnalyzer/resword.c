@@ -43,10 +43,13 @@ void createTable(symbolNode head){
                 }//end NL while
 
                 char tmp[] = {'N','U','L','L'};
+
                 if(strcmp(elements[0],tmp) != 0){
-                    int i = atoi(elements[1]);
-                    int j = atoi(elements[2]);
-                    addNode(head, elements[0], NULL, i, j);
+
+                    tkn = atoi(elements[1]);
+                    attr = atoi(elements[2]);
+                    //printf("elements[0] %-15s elements[1] %d elements[2] %d\n",elements[0],tkn,attr);
+                    addNode(head, elements[0], NULL, tkn, attr);
                 }
                 strcpy(elements[0],"NULL");
 

@@ -250,7 +250,9 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
                     result = isWord(idtable,string);
                     if( result != NULL){
                         //this is if the word is already in the table
-                        return *result->lex;
+                        struct Lexeme lex = *result->lex;
+                        //printf("lex->word %-15s lex->attr %d\n", lex.word,lex.attr.val);
+                        return lex;
                     }
                     else{
                         printf("ERROR returning result->lex\n");
@@ -258,12 +260,16 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
                 }
                 else{
                     //not resword but is an existing identifier
-                    return *result->lex;
+                    struct Lexeme lex = *result->lex;
+                    //printf("lex->word %-15s lex->attr %d\n", lex.word,lex.attr.val);
+                    return lex;
                 }
             }
             else{
                 //this is a resword
-                return *result->lex;
+                struct Lexeme lex = *result->lex;
+                //printf("lex->word %-15s lex->attr %d\n", lex.word,lex.attr.val);
+                return lex;
             }
         }
     }
@@ -337,6 +343,7 @@ struct Lexeme realM(char **fptr, char **bptr){
         else{
             strcpy(realerr.word,realstr);
         }
+
         if(fcounter > 5){
             printf("REALFRONTTOOLONG\n");
             realerr.attr.val = REALFTOOLONG;
@@ -354,8 +361,16 @@ struct Lexeme realM(char **fptr, char **bptr){
             realerr.attr.val = REALETOOLONG;
             return realerr;
         }
-
-        //printf("real: %s\n", realstr);
+        if(realstr[0]=='0'){
+            printf("LEADINGZERO\n" );
+            realerr.attr.val = LEADINGZERO;
+            return realerr;
+        }
+        if(realstr[fcounter+rcounter]=='0'){
+            printf("TRAILINGZERO\n");
+            realerr.attr.val = TRAILINGZERO;
+            return realerr;
+        }
         strcpy(realData.word,realstr);
         return realData;
     }

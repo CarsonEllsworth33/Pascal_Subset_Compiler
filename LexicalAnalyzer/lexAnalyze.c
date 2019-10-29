@@ -16,6 +16,14 @@
 symbolNode restable;
 symbolNode idtable;
 
+
+struct Lexeme get_next_token(char *buffer, FILE *tokenF,FILE *listF){
+
+}
+
+
+
+
 void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
     //file and output should be two open files upon the function call
     char buffer[72];
@@ -26,6 +34,7 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
     idtable = createNode(NULL,"idtablehead");
     //creates a reserved word table
     createTable(restable);
+    printf("value of idtable ptr: %p\n",idtable );
     //traverseList(restable);
 
     if(input == NULL || listF == NULL){
@@ -44,7 +53,10 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
                 fprintf(tokenF, "           EOF            %-2d (EOF)      %-d    (NULL)\n", EOF,0);
                 break;
             }
-            //this makes sure that a line greater than 70 characters will be broken up
+            //this makes sure that a line greater than 72 characters will be broken up
+            //buffer[72]='\n';
+            //buffer[73]='\0';
+
             buffer[70]='\n';
             buffer[71]='\0';
 
@@ -52,14 +64,15 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
             fptr=buffer;
             bptr=buffer;
             linecnt++;
-            
+
             //make listing file
             fprintf(listF,"%d    %s",linecnt,buffer);
 
+            //this is the lexical analyzer, it may need to be made into its own function, but here it is.
             while(1){
 
                 struct Lexeme wsLM = whiteSpace(&fptr,&bptr);
-                printf("wsLM tkn: %d wsLM attr: %d\n", wsLM.tkn,wsLM.attr.val);
+                //printf("wsLM tkn: %d wsLM attr: %d\n", wsLM.tkn,wsLM.attr.val);
                 if(wsLM.tkn != MNOTREC){
                     if(wsLM.attr.val == WSPACE_NL){
                         break;
@@ -72,7 +85,7 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
 
 
                 struct Lexeme idLM = idres(&fptr,&bptr,restable,idtable);
-                printf("idLM tkn: %d\n", idLM.tkn);
+                //printf("idLM tkn: %d\n", idLM.tkn);
                 //printf("linecnt: %d %s %d tkn %d val %p ptr\n",linecnt,idLM.word,idLM.tkn,idLM.attr.val,idLM.attr.ptr);
                 if(idLM.tkn != MNOTREC){
                     if(idLM.tkn == LEXERROR){
@@ -95,7 +108,7 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
 
 
                 struct Lexeme relopLM = relop(&fptr,&bptr);
-                printf("relopLM tkn: %d\n", relopLM.tkn);
+                //printf("relopLM tkn: %d\n", relopLM.tkn);
                 if(relopLM.tkn != MNOTREC) {
                     if(relopLM.tkn == LEXERROR){
                         continue;
@@ -119,7 +132,7 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
 
 
                 struct Lexeme realLM = realM(&fptr,&bptr);
-                printf("realLM tkn: %d\n", realLM.tkn);
+                //printf("realLM tkn: %d\n", realLM.tkn);
                 if(realLM.tkn != MNOTREC) {
                     if(realLM.tkn == LEXERROR){
                         if(realLM.attr.val == REALFTOOLONG){
@@ -134,6 +147,14 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
                             fprintf(listF, "LEXERR:     Real number exponent is greater than 2 digits: %s\n",realLM.word);
                             fprintf(tokenF, "  %-3d      %-14s %-2d %-10s %-14d (REALEXPONENTTOOLONG)\n",linecnt,realLM.word,realLM.tkn,"(LEXERROR)",realLM.attr.val);
                         }
+                        else if(realLM.attr.val == LEADINGZERO){
+                            fprintf(listF, "LEXERR:     Real number has leading zero: %s\n",realLM.word);
+                            fprintf(tokenF, "  %-3d      %-14s %-2d %-10s %-14d (LEADINGZERO)\n",linecnt,realLM.word,realLM.tkn,"(LEXERROR)",realLM.attr.val);
+                        }
+                        else if(realLM.attr.val == TRAILINGZERO){
+                            fprintf(listF, "LEXERR:     Real number has trailing zero: %s\n",realLM.word);
+                            fprintf(tokenF, "  %-3d      %-14s %-2d %-10s %-14d (TRAILINGZERO)\n",linecnt,realLM.word,realLM.tkn,"(LEXERROR)",realLM.attr.val);
+                        }
                         continue;
                     }
                     else{
@@ -143,7 +164,7 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
 
 
                 struct Lexeme intLM = intM(&fptr,&bptr);
-                printf("intLM tkn: %d\n", intLM.tkn);
+                //printf("intLM tkn: %d\n", intLM.tkn);
                 if(intLM.tkn != MNOTREC) {
                     if(intLM.tkn == LEXERROR){
                         if(intLM.attr.val == INTTOOLONG){
@@ -157,7 +178,7 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
 
 
                 struct Lexeme catchLM = catchallM(&fptr,&bptr,input);
-                printf("catchLM tkn: %d catchLM wrd: %s\n", catchLM.tkn,catchLM.word);
+                //printf("catchLM tkn: %d catchLM wrd: %s\n", catchLM.tkn,catchLM.word);
                 if(catchLM.tkn != MNOTREC) {
                     if(catchLM.tkn == LEXERROR ){
                         if(catchLM.attr.val == UNKNOWNSYMBOL){

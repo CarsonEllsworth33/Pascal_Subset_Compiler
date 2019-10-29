@@ -60,9 +60,10 @@
 #define REALBTOOLONG  3
 #define REALETOOLONG  4
 #define LEADINGZERO   5
-#define UNKNOWNSYMBOL 6
-#define PARENMISMATCH 7
-#define BRACKMISMATCH 8
+#define TRAILINGZERO  6
+#define UNKNOWNSYMBOL 7
+#define PARENMISMATCH 8
+#define BRACKMISMATCH 9
 #define COMMA         78
 #define SEMICOLON     79
 #define COLON         80
