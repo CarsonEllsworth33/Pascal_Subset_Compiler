@@ -67,7 +67,7 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
 
             //make listing file
             fprintf(listF,"%d    %s",linecnt,buffer);
-
+            printf("%s\n", buffer);
             //this is the lexical analyzer, it may need to be made into its own function, but here it is.
             while(1){
 
@@ -158,7 +158,7 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
                         continue;
                     }
                     else{
-                        fprintf(tokenF, "  %-3d      %-14s %-2d %-10s %-14d (REAL)\n",linecnt,realLM.word,realLM.tkn,"(LEXERROR)",realLM.attr.val);
+                        fprintf(tokenF, "  %-3d      %-14s %-2d %-10s %-14d (REAL)\n",linecnt,realLM.word,realLM.tkn,"(REAL)",realLM.attr.val);
                     }
                 }
 
@@ -172,6 +172,9 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
                             fprintf(listF, "LEXERR:     Integer is greater than 10 digits: %s\n",intLM.word);
                         }
                         continue;
+                    }
+                    else{
+                        fprintf(tokenF, "  %-3d      %-14s %-2d %-10s %-14d (INTEGER)\n",linecnt,intLM.word,intLM.tkn,"(INTEGER)",intLM.attr.val);
                     }
                     continue;
                 }

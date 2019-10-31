@@ -204,10 +204,12 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
     id.attr.val = 0;
 
     int counter = 0;//counter to make hard things simple
-    if(match(**fptr,letter,letterSize)){
+    if(match(**fptr,letter,letterSize) && **fptr != '\n'){
         //**fptr is a letter
         //(*fptr)++;//buffer address pointer
-        while(match(**fptr,letter,letterSize) || match(**fptr,digit,digitSize)){
+        (*bptr) = (*fptr);
+        printf("fptr: %c bptr: %c\n", **fptr,**bptr);
+        while((match(**fptr,letter,letterSize) || match(**fptr,digit,digitSize)) && **fptr != '\n'){
             //string[counter] = **fptr;
             (*fptr)++;
             counter++;
@@ -217,10 +219,12 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
 
             //while MNOTREC and is less than 10
             char string[counter+1];//temp string to build up identifiers
+
             for(int i = 0; i <= counter; i++){
                 string[i] = **bptr;
                 (*bptr)++;
             }
+
             string[counter] = '\0';
 
             if(counter > 10){
@@ -284,7 +288,7 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
 struct Lexeme realM(char **fptr, char **bptr){
     struct Lexeme realData;
     realData.tkn = REAL;
-    realData.attr.val = 0;;
+    realData.attr.val = 0;
     struct Lexeme realerr;
     realerr.tkn = LEXERROR;
 
@@ -303,18 +307,33 @@ struct Lexeme realM(char **fptr, char **bptr){
             while(match(**fptr,digit,digitSize)){
                 (*fptr)++;
                 rcounter++;
+                printf("fptr: %c bptr: %c\n", **fptr,**bptr);
             }
+            printf("rcounter %d\n",rcounter );
             if(rcounter > 0){
                 if(**fptr == 'E'){
-                    (*fptr)++;
+                    (*fptr)++;//advance past E
                     epresent = 1;
                     while(match(**fptr,digit,digitSize)){
                         (*fptr)++;
                         ecounter++;
                     }
+                    if(ecounter == 0){
+                        //backtrack fptr 1 and back out of it
+                        (*fptr) = (*fptr) - 1;
+                        epresent = 0;
+                        printf("REAL NO E fptr: %c bptr: %c\n", **fptr,**bptr);
+                    }
                 }
             }
+            else if(rcounter == 0){
+                (*fptr) = (*bptr);
+                //printf("MACHINE NOT RECOGNIZED REALM\n");
+                return MN;
+            }
         }
+
+
         else{
             (*fptr) = (*bptr);
             //printf("MACHINE NOT RECOGNIZED REALM\n");
@@ -322,7 +341,7 @@ struct Lexeme realM(char **fptr, char **bptr){
         }
 
         int counter = fcounter + rcounter + ecounter + epresent;
-
+        printf("real counter %d\n",counter );
         char realstr[counter + 1];//takes into account the dot and E if present
         int strcntr = 0;
         while(*bptr != *fptr){
@@ -392,11 +411,12 @@ struct Lexeme intM(char **fptr, char **bptr){
     interr.attr.val = INTTOOLONG;
 
     int counter = 0;
-
     while(match(**fptr,digit,digitSize)){
         (*fptr)++;
         counter++;
+        printf("int %c\n",**fptr);
     }
+    printf("int breakout on %c\n",**fptr);
     char intstr[counter + 1];
     for(int i = 0; i <= counter; i++){
         intstr[i] = **bptr;
