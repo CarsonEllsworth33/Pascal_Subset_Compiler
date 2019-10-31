@@ -1,5 +1,4 @@
 1    3.4E+
-LEXERR:      Unrecognized Symbol:    E
 2    3E4.8
 3    34E48
 4    3.E4+

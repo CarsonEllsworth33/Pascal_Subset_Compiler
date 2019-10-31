@@ -159,6 +159,7 @@ void read_print_line(FILE *input, FILE *listF, FILE *tokenF){
                     }
                     else{
                         fprintf(tokenF, "  %-3d      %-14s %-2d %-10s %-14d (REAL)\n",linecnt,realLM.word,realLM.tkn,"(REAL)",realLM.attr.val);
+                        continue;
                     }
                 }
 
