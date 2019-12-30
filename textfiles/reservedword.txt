@@ -1,3 +1,4 @@
+/reswords cannot be more than 14 characters long
 program 50 0 ;
 var 51 0 ;
 array 53 0 ;
@@ -11,12 +12,12 @@ or 64 2 ;
 div 65 2 ;
 mod 65 3 ;
 and 65 4 ;
-if 68 0 ;
-then 69 0 ;
-else 70 0 ;
-while 71 0 ;
-do 72 0 ;
-not 73 0 ;
+if 67 0 ;
+then 68 0 ;
+else 69 0 ;
+while 70 0 ;
+do 71 0 ;
+not 72 0 ;
 /to include new reserved words in the table follow the format of
 /  <name> <tkn> <attr> ;
 /make sure there are spaces between each word

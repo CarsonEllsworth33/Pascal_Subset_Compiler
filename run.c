@@ -5,7 +5,7 @@
 #include "lexeme.c"
 #include "symbolNode.c"
 #include "LexicalAnalyzer/lexAnalyze.c"
-
+#include "Parser/parser.c"
 
 
 int main(int argc, char *argv[]) {
@@ -22,7 +22,18 @@ int main(int argc, char *argv[]) {
 	FILE *token = fopen("textfiles/token.txt","w");
 
 	if(file != NULL){
-		read_print_line(file,list,token);
+		restable = createNode(NULL,"restablehead");
+	    idtable = createNode(NULL,"idtablehead");
+		createTable(restable);
+		//traverseList(restable);
+		fgets(buffer, sizeof(buffer), file);
+		fprintf(list,"%d    %s",1,buffer);
+		fprintf(token, "Line No.   Lexeme         TOKEN-TYPE    ATTRIBUTE\n");
+
+		parse(file,list,token);
+
+
+		//read_print_line(file,list,token);
 	}
 	else{
 		printf("program.txt file not found\n");

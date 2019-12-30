@@ -17,7 +17,7 @@ int parenClose = 0;
 int brackOpen = 0;
 int brackClose = 0;
 
-struct Lexeme MN = {MNOTREC,"",{0}};
+struct Lexeme MN = {MNOTREC,TYPEERR,"",{0}};
 //MN.tkn = MNOTREC;
 //MN.attr.val = MNOTREC;
 //symbolNode head = reswordSetup();
@@ -208,7 +208,6 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
         //**fptr is a letter
         //(*fptr)++;//buffer address pointer
         (*bptr) = (*fptr);
-        printf("fptr: %c bptr: %c\n", **fptr,**bptr);
         while((match(**fptr,letter,letterSize) || match(**fptr,digit,digitSize)) && **fptr != '\n'){
             //string[counter] = **fptr;
             (*fptr)++;
@@ -272,7 +271,7 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
             else{
                 //this is a resword
                 struct Lexeme lex = *result->lex;
-                //printf("lex->word %-15s lex->attr %d\n", lex.word,lex.attr.val);
+                //printf("idres|lex->word %-15s lex->attr %d\n", lex.word,lex.attr.val);
                 return lex;
             }
         }
@@ -287,8 +286,9 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
 
 struct Lexeme realM(char **fptr, char **bptr){
     struct Lexeme realData;
-    realData.tkn = REAL;
+    realData.tkn = NUM;
     realData.attr.val = 0;
+    realData.type = TYPEREAL;
     struct Lexeme realerr;
     realerr.tkn = LEXERROR;
 
@@ -307,9 +307,8 @@ struct Lexeme realM(char **fptr, char **bptr){
             while(match(**fptr,digit,digitSize)){
                 (*fptr)++;
                 rcounter++;
-                printf("fptr: %c bptr: %c\n", **fptr,**bptr);
             }
-            printf("rcounter %d\n",rcounter );
+            //printf("rcounter %d\n",rcounter );
             if(rcounter > 0){
                 if(**fptr == 'E'){
                     (*fptr)++;//advance past E
@@ -322,7 +321,7 @@ struct Lexeme realM(char **fptr, char **bptr){
                         //backtrack fptr 1 and back out of it
                         (*fptr) = (*fptr) - 1;
                         epresent = 0;
-                        printf("REAL NO E fptr: %c bptr: %c\n", **fptr,**bptr);
+                        //printf("REAL NO E fptr: %c bptr: %c\n", **fptr,**bptr);
                     }
                 }
             }
@@ -341,7 +340,7 @@ struct Lexeme realM(char **fptr, char **bptr){
         }
 
         int counter = fcounter + rcounter + ecounter + epresent;
-        printf("real counter %d\n",counter );
+        //printf("real counter %d\n",counter );
         char realstr[counter + 1];//takes into account the dot and E if present
         int strcntr = 0;
         while(*bptr != *fptr){
@@ -364,29 +363,29 @@ struct Lexeme realM(char **fptr, char **bptr){
         }
 
         if(fcounter > 5){
-            printf("REALFRONTTOOLONG\n");
+            //printf("REALFRONTTOOLONG\n");
             realerr.attr.val = REALFTOOLONG;
             return realerr;//real front too long
         }
 
         if(rcounter > 5){
-            printf("REALBACKTOOLONG\n");
+            //printf("REALBACKTOOLONG\n");
             realerr.attr.val = REALBTOOLONG;
             return realerr;
         }
 
         if(ecounter > 2){
-            printf("REALEXPONENTTOOBIG\n");
+            //printf("REALEXPONENTTOOBIG\n");
             realerr.attr.val = REALETOOLONG;
             return realerr;
         }
         if(realstr[0]=='0'){
-            printf("LEADINGZERO\n" );
+            //printf("LEADINGZERO\n" );
             realerr.attr.val = LEADINGZERO;
             return realerr;
         }
         if(realstr[fcounter+rcounter]=='0'){
-            printf("TRAILINGZERO\n");
+            //printf("TRAILINGZERO\n");
             realerr.attr.val = TRAILINGZERO;
             return realerr;
         }
@@ -403,8 +402,9 @@ struct Lexeme realM(char **fptr, char **bptr){
 
 struct Lexeme intM(char **fptr, char **bptr){
     struct Lexeme intData;
-    intData.tkn = INTEGER;
+    intData.tkn = NUM;
     intData.attr.ptr = NULL;
+    intData.type = TYPEINT;
 
     struct Lexeme interr;
     interr.tkn = LEXERROR;
@@ -414,9 +414,9 @@ struct Lexeme intM(char **fptr, char **bptr){
     while(match(**fptr,digit,digitSize)){
         (*fptr)++;
         counter++;
-        printf("int %c\n",**fptr);
+        //printf("int %c\n",**fptr);
     }
-    printf("int breakout on %c\n",**fptr);
+    //printf("int breakout on %c\n",**fptr);
     char intstr[counter + 1];
     for(int i = 0; i <= counter; i++){
         intstr[i] = **bptr;

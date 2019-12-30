@@ -22,9 +22,11 @@ struct symbolNode{
 typedef struct symbolNode *symbolNode;
 typedef struct Lexeme *Lex;
 
-symbolNode createNode(Lex lex/*int tkn*/, char name[]/*,symbolNode temp*/){
+symbolNode createNode(Lex lex, char name[]){
     symbolNode newNode = (symbolNode)malloc(sizeof(symbolNode) + sizeof(char[strlen(name)]));
-    
+    Lex l = (Lex)malloc(sizeof(Lex));
+    //*l = *lex;
+    //printf("tkn val%d\n",l->tkn);
     strcpy(newNode->name,name);
     //newNode->tkn = tkn;
     newNode->lex = lex;
@@ -53,7 +55,7 @@ symbolNode addNode(symbolNode head, char name[],symbolNode tbl, int tkn, int att
     else{
 
         l->attr.ptr = temp;
-        //printf("l->word: %-15s &temp: %p temp: %p\n",l->word,&temp,temp);
+        //printf("l->word: %-15s temp: %p\n",l->word,l->attr.ptr);
     }
     //printf("l->word %-14s l->attr.val %d l->attr.ptr %p\n", l->word,l->attr.val,l->attr.ptr);
     temp = createNode(l,name/*,temp*/);//this will be added to the back of the list
@@ -76,13 +78,13 @@ void traverseList(symbolNode head){
     while(p->next != NULL){
         if(p->lex == NULL){}//head node does not have lexeme associated with it
         else{
-            //printf("name: %s |Lex->tkn: %d |Lex->attr.val: %d\n", p->name,p->lex->tkn,p->lex->attr.val);
+            printf("name: %s |Lex->tkn: %d |Lex->attr.val: %d\n", p->name,p->lex->tkn,p->lex->attr.val);
         }
         p = p->next;
     }
     if(p->lex == NULL){}
     else{
-        //printf("name: %s |Lex->tkn: %d |Lex->attr.val: %d\n", p->name,p->lex->tkn,p->lex->attr.val);
+        printf("name: %s |Lex->tkn: %d |Lex->attr.val: %d\n", p->name,p->lex->tkn,p->lex->attr.val);
     }
 }
 

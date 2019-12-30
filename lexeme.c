@@ -12,7 +12,7 @@
 #define OF            54
 #define INTEGER       55
 #define REAL          56
-#define LONGREAL      57 //not useful
+#define NUM           57
 #define FUNCTION      58
 #define PROCEDURE     59 //not useful
 #define BEGIN         60
@@ -67,10 +67,18 @@
 #define COMMA         78
 #define SEMICOLON     79
 #define COLON         80
+#define TYPEINT       81
+#define TYPEREAL      82
+#define TYPEBOOL      83
+#define TYPEARR       84
+#define TYPEARR_INT   0
+#define TYPEARR_REAL  1
+#define TYPEERR       85
 
 struct Lexeme
 {
 int tkn;
+int type;
 char word[15];
 union {
     int val;
