@@ -17,12 +17,14 @@
 17       function fun2(x: integer; y: integer) : real;
 18         var e: real;
 19    
-20         function fun3(n: integer; z: real) : integer;
+20         function fun3(n: ; z: real) : integer;
+tok mismatch expecting integer, real, array, instead recieved ;
 21           var e: integer;
 22           begin
 23             a:= e;
 24             e:= c[e];
-25             fun3 := 3
+25             fun3  3
+tok mismatch expecting :=, [, instead recieved 3
 26           end;
 27    
 28         begin
@@ -38,8 +40,9 @@
 38           fun2 := 2.5
 39         end;
 40    
-41    begin
+41    
 42      b:= fun2(c[4], c[5]);
+tok mismatch expecting function, begin, instead recieved b
 43      b:= fun2(c[4],2);
 44      if (a < 2) then a:= 1 else a := a + 2;
 45      if (b > 4.2) then a := c[a]

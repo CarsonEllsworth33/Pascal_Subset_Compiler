@@ -34,7 +34,6 @@ int tok_match(int t,int val){
             else if(tok.tkn == NUM){
                 type = tok.type;
                 printf("lexeme: %s, type: %d\n",tok.word,tok.type);
-                tok = get_next_token(file,list,token);
                 return type;
             }
             else{
@@ -597,6 +596,7 @@ void sub_decs(){
 }
 
 void std_type(){
+    char syncSet[] = {';'};
     switch(tok.tkn){
         case INTEGER:
             tok_match(INTEGER,0);
@@ -605,7 +605,7 @@ void std_type(){
             tok_match(REAL,0);
             break;
         default:
-            fprintf(list,"tok mismatch expecting ; instead recieved %s\n",tok.word);
+            fprintf(list,"tok mismatch expecting %s instead recieved %s\n",syncSet,tok.word);
             while(strcmp(tok.word,";") != 0){
                 tok = get_next_token(file,list,token);
             }
@@ -686,6 +686,7 @@ void id_lst(){
     char syncSet[] = {')'};
     switch(tok.tkn){
         case ID:
+            //printf("ID_LST fucnt\n");
             tok_match(ID,0); id_lstT();
         break;
         default:

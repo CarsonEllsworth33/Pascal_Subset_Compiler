@@ -74,6 +74,7 @@
 #define TYPEARR_INT   0
 #define TYPEARR_REAL  1
 #define TYPEERR       85
+#define TYPEVOID      86
 
 struct Lexeme
 {
