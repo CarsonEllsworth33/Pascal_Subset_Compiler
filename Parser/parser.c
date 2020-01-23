@@ -107,24 +107,31 @@ void factorT(){
             while (tok.tkn != MULOP ||tok.tkn != ADDOP || tok.tkn != RELOP || tok.tkn != SEMICOLON || tok.tkn != END || tok.tkn != ELSE || tok.tkn != THEN || tok.tkn != DO || tok.tkn != COMMA || strcmp(tok.word,")") != 0 || strcmp(tok.word,"]") != 0) {
                 tok = get_next_token(file,list,token);
             }
+            return TYPEERR;
     }
 }
 
-void factor(){
+int factor(){
     switch (tok.tkn) {
         case ID:
-            tok_match(ID,0); factorT();
+            int r_val = tok_match(ID,0); factorT();
             break;
         case NUM:
-            tok_match(NUM,0);
-            break;
+            int r_val = tok_match(NUM,0);
+            return r_val;
         case NOT:
-            tok_match(NOT,0); factorT();
-            break;
+            tok_match(NOT,0); int r_val = factorT();
+            if(r_val == TYPEBOOL){
+                return TYPEBOOL;
+            }
+            else{
+                printf("type mismatch, expecting typecode: %d recieved: %d\n"TYPEBOOL,r_val);
+                return TYPEERR;
+            }
         case PAREN:
             if(tok.attr.val == PAREN_OPEN){
-                tok_match(PAREN,PAREN_OPEN); expr(); tok_match(PAREN,PAREN_CLOSE);
-                break;
+                tok_match(PAREN,PAREN_OPEN); int r_val = expr(); tok_match(PAREN,PAREN_CLOSE);
+                return r_val;
             }
         default:
             fprintf(list,"tok mismatch expecting %s,%s,%s,%s, instead recieved %s\n","Identifier","Number","not","(",tok.word);
