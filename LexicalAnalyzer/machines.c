@@ -199,7 +199,7 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
     idtl.tkn = LEXERROR;
     idtl.attr.val = IDTOOLONG;
 
-    struct Lexeme id;//0 is tmp value, this actually needs to be a pointer
+    struct Lexeme id;
     id.tkn = ID;
     id.attr.val = 0;
 

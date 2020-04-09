@@ -14,12 +14,22 @@ What is done:
 #include <string.h>
 #include "../lexeme.c"
 
+#define GREEN 101
+#define BLUE 100
+/*
+struct stack {
+    void *stackbase;
+    void *stacktop;
+};
+typedef struct stack *stack_ptr;
+
 struct bluenode{
     int type;
     char name[15];
-    struct bluenode *next;
-    struct bluenode *prev;
-    struct bluenode *self; //points to its own address
+    void *next;
+    void *prev;
+    //struct bluenode *self; //points to its own address
+    int color;
     int tkn;
 };
 typedef struct bluenode *blueNode;
@@ -31,12 +41,13 @@ typedef struct bluestack *blstack;
 
 void make_add_blue_node(blstack bs,char name[15],int type,int tkn){
     //create space for a bluenode in memory and return an address to its location
-    blueNode new_node = (blueNode) malloc(sizeof(bluenode));
+    blueNode new_node = (blueNode) malloc(sizeof(struct bluenode));
     //assign a name to the node
     strcpy(new_node->name,name);
     //assign its address to self
-    new_node->self = new_node;
+    //new_node->self = new_node;
     new_node->type = type;
+    new_node->tkn = tkn;
     if(bs->topNode == NULL){
         bs->topNode = new_node;
         return;
@@ -71,17 +82,15 @@ void blueaddtype(blueNode bn, int type){
 
 
 
-
-
 struct greennode {
     int returnType;
     char name[15];
-    blueNode param_list;
     struct greennode *parent;
-    struct greennode *child; //points to a node within its code body
-    struct greennode *next; //points to the next node out of its body
-    struct greennode *prev;
-    struct greennode *self;
+    //struct greennode *self;
+    void *child; //points to a node within its code body
+    void *next; //points to the next node out of its body
+    void *prev;
+    int color;
     int tkn;
 };
 typedef struct greennode *greenNode;
@@ -90,9 +99,48 @@ void greenaddtype(greenNode gn, int type){
     printf("%s now has %d return type\n",gn->name,type );
     gn->returnType = type;
 }
+void greenaddparam(int stack,int param_type){
 
-void make_add_greed_node(int return_type,char name[15],int is_child){}
+}
+/*
+void make_add_green_node(stack_ptr st,int returnType,char name[15],int is_child){
+    greenNode new_node = (greenNode) malloc(sizeof(struct greennode));
+    strcpy(new_node->name,name);
+    new_node->returnType = returnType;
+    new_node->color = GREEN;
+    int set_child = 0;
+    if(is_child == 1){
+        greenNode temp = st->stacktop;
+        while(set_child == 0){
+            if (temp->color == GREEN){
+                //this node is the parent
+                set_child = 1;
+                temp->child = new_node;//make temps child the new_node
+                new_node->parent = temp;//make new_nodes parent temp
 
+                st->stacktop = new_node;//This line could be wrong
+            }
+            else if(temp->color == BLUE){
+                //go back one node
+                if(temp->prev == NULL){
+                    printf("ERROR CANNOT ADD NODE AS A CHILD\n");
+                }
+                else{
+                    temp = temp->prev;
+                }
+            }
+        }
+    }//END IS_CHILD check
+    else{
+        greenNode temp = st->stacktop;
+        temp->next = new_node;
+        new_node->prev = temp;
+        st->stacktop = new_node;
+    }
+
+}
+*/
+/*
 int greenNodeParamCount(greenNode gn){
     int count = 0;
     blueNode temp;
@@ -106,34 +154,10 @@ int greenNodeParamCount(greenNode gn){
     }
     return count;
 }
+*/
 
-
-
-/*
-struct greenstack{
-    greenNode topNode;
-    greenNode curNode;
-};
-typedef struct greenstack *greenstack;
-
-
-
-struct bluenode x1 = {0,"x1",NULL,NULL};
-struct bluenode x2 = {0,"x2",NULL,&x1};
-struct greennode gn1 = {0,"fun1",&x1,NULL};
-struct greennode gn2 = {0,"fun2",NULL, NULL};
-struct bluestack bs1 = {NULL};
-greenNode gn = &gn1;
-greenNode gnn = &gn2;
-blueNode bn = &x1;
-blstack bs = &bs1;
-
+stack_ptr st;
 int main(){
-    x1.next = &x2;
-    int count = greenNodeParamCount(gn);
-    int count2 = greenNodeParamCount(gnn);
-    make_add_blue_node(bs,"1",TYPEINT,ID);
-    print_blue_stack(bs);
     return 0;
 }
 

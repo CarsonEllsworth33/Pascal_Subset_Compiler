@@ -4,52 +4,56 @@
 #include <stdio.h>
 #include "../LexicalAnalyzer/lexAnalyze.c"
 #include "../lexeme.c"
+#include "../node/nodetest.c"
 
 struct Lexeme tok;
+Lex tok_lex;
+struct node_stack parsestack;
+stack_ptr st = &parsestack;
 FILE *token;
 FILE *list;
 FILE *file;
 
 void decs();
-void std_type();
+int std_type();
 void sub_decs();
-void type();
+int type();
 void cmpd_stmt();
 void stmt();
 void expr_lst();
-void expr();
+int expr();
 
-int tok_match(int t,int val){
+Lex tok_match(int t,int val){
     //int t = lex.tkn;
-    int type;
+    //int type;
+    tok_lex = &tok;
     printf("tokcmp %d %d\n",tok.tkn, t);
     if(t == tok.tkn){
         if(t != EOF && val == 0){
             if(tok.tkn == ID ){
-                type = tok.type;
                 printf("lexeme: %s, type: %d\n",tok.word,tok.type);
                 tok = get_next_token(file,list,token);
-                return type; //all good here
+                return tok_lex; //all good here
             }
             else if(tok.tkn == NUM){
-                type = tok.type;
                 printf("lexeme: %s, type: %d\n",tok.word,tok.type);
                 tok = get_next_token(file,list,token);
-                return type;
+                return tok_lex;
             }
             else{
                 tok = get_next_token(file,list,token);
-                return 0; //all good here
+                return tok_lex; //all good here
             }
         }
         if(val != 0 && tok.attr.val == val){
             tok = get_next_token(file,list,token);
-            return 0;
+            return tok_lex;
         }
         if(val != 0 && tok.attr.val != val){
             printf("Sync Error!! Expecting token %d attr %d instead recieved token %s \n",t,val,tok.word);
-            //THIS ALSO NEEDS A PRINTOUT TO THE LISTING FILE
+            fprintf(list,"tok mismatch, expecting token code %d instead recieved token %s\n",t,tok.word);
             tok = get_next_token(file,list,token);
+            return NULL;
         }
         else{
             exit(0);
@@ -60,10 +64,10 @@ int tok_match(int t,int val){
 
     else{
         printf("Sync Error!! Expecting token %d instead recieved token %s \n",t,tok.word);
-        //THIS ALSO NEEDS A PRINTOUT TO THE LISTING FILE
+        fprintf(list,"tok mismatch, expecting token code %d instead recieved token %s\n",t,tok.word);
         tok = get_next_token(file,list,token);
     }
-    return -1;
+    return NULL;
 }
 
 
@@ -87,21 +91,37 @@ void sign(){
     }
 }
 
-void factorT(){
+int factorT(){
     switch (tok.tkn) {
-        case MULOP: case ADDOP: case RELOP: case SEMICOLON: case END: case ELSE: case THEN: case DO: case COMMA:
-            break;
+        case MULOP:
+            return 0;
+        case ADDOP:
+            return 0;
+        case RELOP:
+            return 0;
+        case SEMICOLON:
+            return 0;
+        case END:
+            return 0;
+        case ELSE:
+            return 0;
+        case THEN:
+            return 0;
+        case DO:
+            return 0;
+        case COMMA:
+            return 0;
         case PAREN:
             if(tok.tkn == PAREN && tok.attr.val == PAREN_OPEN){
                 tok_match(PAREN,PAREN_OPEN); expr_lst(); tok_match(PAREN,PAREN_CLOSE);
-                break;
+                return 0;
             }
         case BRACK:
             if(tok.tkn == BRACK && tok.attr.val == BRACK_OPEN){
                 tok_match(BRACK,BRACK_OPEN); expr(); tok_match(BRACK,BRACK_CLOSE);
-                break;
+                return 0;
             }
-            if(tok.attr.val == PAREN_CLOSE || tok.attr.val == BRACK_CLOSE){break;}
+            if(tok.attr.val == PAREN_CLOSE || tok.attr.val == BRACK_CLOSE){return 0;}
         default:
             fprintf(list,"tok mismatch expecting %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, instead recieved %s\n","* / div mod and","+ - or","< > <= >= <> ==",";","end","else","then","do",",","]",")",tok.word);
             while (tok.tkn != MULOP ||tok.tkn != ADDOP || tok.tkn != RELOP || tok.tkn != SEMICOLON || tok.tkn != END || tok.tkn != ELSE || tok.tkn != THEN || tok.tkn != DO || tok.tkn != COMMA || strcmp(tok.word,")") != 0 || strcmp(tok.word,"]") != 0) {
@@ -110,14 +130,18 @@ void factorT(){
             return TYPEERR;
     }
 }
-
+//NEED TO FIX RVALUE tok_match stuff
 int factor(){
+    int r_val = 0;
+    Lex tok_ret;
     switch (tok.tkn) {
         case ID:
-            int r_val = tok_match(ID,0); factorT();
+            tok_ret = tok_match(ID,0); factorT();
+
             break;
         case NUM:
-            int r_val = tok_match(NUM,0);
+            tok_ret = tok_match(NUM,0);
+            r_val = get_id_type(st,tok_ret->word);
             return r_val;
         case NOT:
             tok_match(NOT,0); int r_val = factorT();
@@ -125,7 +149,7 @@ int factor(){
                 return TYPEBOOL;
             }
             else{
-                printf("type mismatch, expecting typecode: %d recieved: %d\n"TYPEBOOL,r_val);
+                printf("type mismatch, expecting typecode: %d recieved: %d\n",TYPEBOOL,r_val);
                 return TYPEERR;
             }
         case PAREN:
@@ -139,6 +163,7 @@ int factor(){
                 tok = get_next_token(file,list,token);
             }
     }
+    return TYPEERR;
 }
 
 void termT(){
@@ -237,31 +262,32 @@ void exprT(){
     }
 }
 
-void expr(){
+int expr(){
     //printf("%d,%d,%s\n",tok.tkn,tok.attr.val,tok.word);
     switch (tok.tkn) {
         case NUM: case ID: case NOT:
             smpl_expr(); exprT();
-            break;
+            return 0;
         case ADDOP:
             if(tok.attr.val == ADDOP_PL){
                 smpl_expr(); exprT();
-                break;
+                return 0;
             }
             if(tok.attr.val == ADDOP_MN){
                 smpl_expr(); exprT();
-                break;
+                return 0;
             }
         case PAREN:
             if(tok.attr.val == PAREN_OPEN){
                 smpl_expr(); exprT();
-                break;
+                return 0;
             }
         default:
             fprintf(list,"tok mismatch expecting %s, %s, %s, %s, %s, %s, instead recieved %s\n","Identifier","Number","not","+","-","(",tok.word);
             while (tok.tkn != COMMA || tok.tkn != SEMICOLON || tok.tkn != END || tok.tkn != ELSE || tok.tkn != THEN || tok.tkn != DO || strcmp(tok.word, ")") != 0 || strcmp(tok.word, "]") != 0) {
                 tok = get_next_token(file,list,token);
             }
+            return 0;
     }
 }
 
@@ -433,7 +459,7 @@ void cmpd_stmtT(){
             opt_stmt(); tok_match(END,0);
             break;
         default:
-            fprintf(list,"tok mismatch expecting %s,%s,%s,%s,%s instead recieved %s\n","end","begin","if","while","do",tok.word);
+            fprintf(list,"tok mismatch expecting %s,%s,%s,%s,%s,%s instead recieved %s\n","Identifier","end","begin","if","while","do",tok.word);
             while (strcmp(tok.word,".") != 0 || strcmp(tok.word,"function") != 0 || strcmp(tok.word,"begin") != 0 || strcmp(tok.word,";") != 0 || strcmp(tok.word,"end") != 0) {
                 tok = get_next_token(file,list,token);
             }
@@ -452,7 +478,7 @@ void cmpd_stmt(){
             }
     }
 }
-
+//THIS IS A BLUE NODE FABRICATOR
 void param_lstT(){
     switch (tok.tkn) {
         case SEMICOLON:
@@ -469,7 +495,7 @@ void param_lstT(){
             }
     }
 }
-
+//THIS IS A BLUE NODE FABRICATOR
 void param_lst(){
     switch (tok.tkn) {
         case ID:
@@ -496,28 +522,33 @@ void args(){
             }
     }
 }
-
-void sub_headT(){
+//GREEN NODE FABRICATOR
+int sub_headT(){
+    int s;
     switch (tok.tkn) {
         case COLON:
-            tok_match(COLON,0); std_type(); tok_match(SEMICOLON,0);
-            break;
+            tok_match(COLON,0); s = std_type(); tok_match(SEMICOLON,0);
+            return s;
         case PAREN:
             if (tok.attr.val == PAREN_OPEN){
-                args(); tok_match(COLON,0); std_type(); tok_match(SEMICOLON,0); break;
+                args(); tok_match(COLON,0); s = std_type(); tok_match(SEMICOLON,0);
+                return s;
             }
+            return TYPEERR;//this is the case for a non-openParen
         default:
             fprintf(list,"tok mismatch expecting %s, %s, instead recieved %s\n",":","(",tok.word);
             while(strcmp(tok.word,"var") != 0 ||strcmp(tok.word,"begin") != 0 ||strcmp(tok.word,"function") != 0){
                 tok = get_next_token(file,list,token);
             }
+            return TYPEERR;
     }
 }
-
+//GREEN NODE FABRICATOR
 void sub_head(){
+    int s; //function return type
     switch (tok.tkn) {
         case FUNCTION:
-            tok_match(FUNCTION,0); tok_match(ID,0); sub_headT();
+            tok_match(FUNCTION,0); tok_match(ID,0); s = sub_headT();
             break;
         default:
             fprintf(list,"tok mismatch expecting %s, instead recieved %s\n","function",tok.word);
@@ -603,43 +634,62 @@ void sub_decs(){
     }
 }
 
-void std_type(){
+int std_type(){
     switch(tok.tkn){
-        case INTEGER:
+        case INTEGER://assign identifiers type integer or real here
             tok_match(INTEGER,0);
-            break;
+            return TYPEINT;
         case REAL:
             tok_match(REAL,0);
-            break;
+            return TYPEREAL;
         default:
             fprintf(list,"tok mismatch expecting ; instead recieved %s\n",tok.word);
             while(strcmp(tok.word,";") != 0){
                 tok = get_next_token(file,list,token);
             }
+            return TYPEERR;
+
     }
 }
 
-void type(){
+int type(){
+    int s;
+    int arr_check;
     switch (tok.tkn) {
         case INTEGER: case REAL:
-            std_type();
-            break;
+            s = std_type();
+            return s;
         case ARRAY:
             //for type checking in p3 the two num values need to be of type integer
-            tok_match(ARRAY,0); tok_match(BRACK,BRACK_OPEN); tok_match(NUM,0); tok_match(DOTDOT,0); tok_match(NUM,0); tok_match(BRACK,BRACK_CLOSE);
-            tok_match(OF,0); std_type();
-            break;
+            tok_match(ARRAY,0); tok_match(BRACK,BRACK_OPEN);
+            arr_check = tok_match(NUM,0)->type;
+            if(arr_check != TYPEINT){
+                //throw some error
+            }
+            tok_match(DOTDOT,0);
+            arr_check = tok_match(NUM,0)->type;
+            if(arr_check != TYPEINT){
+                //error or something
+            }
+            tok_match(BRACK,BRACK_CLOSE); //require int type
+            tok_match(OF,0); s = std_type();
+            if (s != TYPEERR){
+                s = s + 3;//type is transformed into respective array type
+            }
+            return s;
         default:
             fprintf(list,"tok mismatch expecting %s, %s, %s, instead recieved %s\n","integer","real","array",tok.word);
             while(strcmp(tok.word,";") != 0){
                 tok = get_next_token(file,list,token);
             }
+            return TYPEERR;
     }
 }
 
 void decsT(){
+    int node_color = BLUE;
     switch(tok.tkn){
-        case VAR:
+        case VAR://grab a variable declaration from here
             tok_match(VAR, 0); tok_match(ID,0); tok_match(COLON, 0); type(); tok_match(SEMICOLON,0); decsT();
         break;
         case FUNCTION: case BEGIN:
@@ -656,6 +706,7 @@ void decsT(){
 void decs(){
     switch(tok.tkn){
         case VAR:
+            //create a blue node here and attach it to what the last function (green node) to put it into scope
             tok_match(VAR, 0); tok_match(ID,0); tok_match(COLON, 0); type(); tok_match(SEMICOLON,0); decsT();
         break;
         default:
