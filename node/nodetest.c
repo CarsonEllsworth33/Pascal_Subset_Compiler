@@ -22,6 +22,10 @@ Possible problems:
 #define GREEN 101
 #define BLUE 100
 
+/*
+All functions that have parameters require the first parameter to be treated as a child node
+*/
+
 
 struct node{
     int type;
@@ -82,6 +86,10 @@ void add_make_node(stack_ptr st, char name[15], int type, int color,int down_sco
         }
     }
 }
+
+/*
+This is the method used for creating new nodes for the stack
+*/
 void check_add_node(stack_ptr st,char name[15],int type, int color,int down_scope){
         node_ptr temp = st->stacktop;
         if (st->stacktop != NULL){
@@ -175,6 +183,7 @@ returns pointer to node if found NULL otherwise
 */
 node_ptr up_stream_node_find(stack_ptr st, char name[15]){
     node_ptr temp = st->stacktop;
+    if (temp == NULL) return NULL;
     while (temp != st->stackbase){
         if(strcmp(temp->name,name) == 0){
             //congrats a node within scope level is Found
@@ -210,7 +219,7 @@ void print_stack(stack_ptr st){
         while (temp->next != st->stacktop){
             if(temp->next == NULL) {
                 if(temp->child != NULL){
-                    printf("temp name: %s\n",temp->name);
+                    printf("node name: %s\n",temp->name);
                     temp = temp->child;
                     continue;
                 }

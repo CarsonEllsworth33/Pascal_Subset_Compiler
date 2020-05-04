@@ -1,0 +1,24 @@
+1    program test (input, output);
+2      var a : integer;
+3      var b : real;
+4      var c : array [1..2] of integer;
+5      function fun2(x: integer; y: integer) : real;
+6        var e : real;
+7        begin
+8          a:= fun1(x, e, c, b);
+9          x:= fun3(c[1], e);
+10          e := e + 4.44;
+11          a:= (a mod y) div x;
+12          while ((a >= 4.3) and ((b <= e) or (not (a = c[a])))) do
+13            begin
+14              a:= c[a] + 1
+15            end;
+16          fun2 := 2.5
+17        end;
+18    
+19    begin
+20      b:= fun2(c[4], f[5]);
+21      b:= fun2(c[4], 2);
+22      if (a < 2) then a:= 1 else a := a[2];
+23      if (b > 4.2) then a := c[a]
+24    end.

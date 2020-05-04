@@ -24,7 +24,7 @@ typedef struct Lexeme *Lex;
 
 symbolNode createNode(Lex lex, char name[]){
     symbolNode newNode = (symbolNode)malloc(sizeof(symbolNode) + sizeof(char[strlen(name)]));
-    Lex l = (Lex)malloc(sizeof(Lex));
+    Lex l = (Lex)malloc(sizeof(struct Lexeme));
     //*l = *lex;
     //printf("tkn val%d\n",l->tkn);
     strcpy(newNode->name,name);
