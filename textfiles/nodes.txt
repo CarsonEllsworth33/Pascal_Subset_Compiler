@@ -1,0 +1,21 @@
+nodes:          type:           NP:            
+test            type void       NA             
+input           type void       test           
+output          type void       test           
+a               integer         test           
+b               real            test           
+c               integer array   test           
+f               real array      test           
+fun1            TBD             test           
+fun5            TBD             fun1           
+fun2            TBD             test           
+x               integer         fun2           
+y               real            fun2           
+e               real            fun2           
+fun3            TBD             fun2           
+g               integer         fun3           
+fun6            TBD             fun2           
+fun7            TBD             fun2           
+g               integer         fun7           
+fun4            TBD             fun2           
+hello           integer array   fun4           

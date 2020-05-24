@@ -1,3 +1,3 @@
 rm run || echo "file already deleted"
-make run
-./run
+gcc run.c -o cpasc
+./cpasc

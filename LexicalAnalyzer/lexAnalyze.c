@@ -35,14 +35,14 @@ struct Lexeme get_next_token(FILE *input,FILE *listF,FILE *tokenF){
                 if(feof(input)){
                     struct Lexeme eof_found = {EOF};
                     fprintf(tokenF, "           EOF            %-2d (EOF)      %-d    (NULL)\n", EOF,0);
-                    exit(0);
+                    //exit(0);
                     return eof_found; //if get_token needs to return lexeme change this
                 }
                 if(paren_count > 0){
-                    fprintf(listF,"Parenthesis mismatch missing %d ) characters\n",paren_count);
+                    fprintf(listF,"LEXERR: Parenthesis mismatch missing %d ) characters\n",paren_count);
                 }
                 if(paren_count < 0){
-                    fprintf(listF,"Parenthesis mismatch missing %d ( characters\n",paren_count*-1);
+                    fprintf(listF,"LEXERR: Parenthesis mismatch missing %d ( characters\n",paren_count*-1);
                 }
                 paren_count = 0;
                 linecnt++;

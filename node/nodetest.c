@@ -19,8 +19,9 @@ Possible problems:
 #include <string.h>
 #include "../lexeme.c"
 
-#define GREEN 101
-#define BLUE 100
+#define GREEN 101 //function or program
+#define BLUE 100 //declared variable
+#define YELLOW 99 //function parameter/variable
 
 /*
 All functions that have parameters require the first parameter to be treated as a child node
@@ -44,66 +45,53 @@ struct node_stack{
 };
 typedef struct node_stack *stack_ptr;
 
+
+/*
+this just adds a node by moving the stack top pointer arround
+*/
 void add_make_node(stack_ptr st, char name[15], int type, int color,int down_scope){
     node_ptr new_node = (node_ptr)malloc(sizeof(struct node));//create new_node
     strcpy(new_node->name,name);
     new_node->color = color;
     new_node->type = type;
+
     if (st->stackbase == NULL){
         printf("Setting up Stack\n" );
         st->stackbase = new_node;
         st->stacktop = new_node;
     }
+    else if(down_scope){
+        st->stacktop->child = new_node;
+        new_node->parent = st->stacktop;
+        st->stacktop = new_node;
+    }
     else{
-        if(down_scope /*&& color == GREEN*/){
-            node_ptr temp = st->stacktop;//top stack node
-            while(temp->color != GREEN){
-                temp=temp->prev;
-                if(temp->prev==NULL){
-                    printf("NO GREEN NODE PRESENT IN STACK NODE NOT ADDED\n");
-                    break;
-                }
-                printf("in while\n");
-            }
-
-            if(temp==NULL);//Do nothing
-            else{
-                //temp is now a green node
-                printf("adding a child node\n");
-                //this is the equivalent of going into a scope level
-                temp->child = new_node;
-                new_node->parent = temp;
-                //new scope aquired
-                st->stacktop = new_node;
-            }
-
-        }
-        else{
-            st->stacktop->next = new_node;
-            new_node->prev = st->stacktop;
-            st->stacktop = new_node;
-            printf("stacktop name in else: %s\n", st->stacktop->name);
-        }
+        st->stacktop->next = new_node;
+        new_node->prev = st->stacktop;
+        st->stacktop = new_node;
     }
 }
 
 /*
 This is the method used for creating new nodes for the stack
 */
-void check_add_node(stack_ptr st,char name[15],int type, int color,int down_scope){
+int check_add_node(stack_ptr st,char name[15],int type, int color,int down_scope){
+    //only check within local scope
         node_ptr temp = st->stacktop;
         if (st->stacktop != NULL){
             while(strcmp(temp->name,name)!=0){
                 //not same keep searching
                 if(temp->prev == NULL){
                     if(temp->parent != NULL){
-                        temp = temp->parent;
+                        printf("reached base of scope, valid to add node\n");
+                        add_make_node(st,name,type,color,down_scope);
+                        return 0;
                     }
                     else{
                         if(temp == st->stackbase){
                             printf("reached base node, valid to add node\n");
                             add_make_node(st,name,type,color,down_scope);
-                            return;
+                            return 0;
                         }
                         else{
                             //throw
@@ -117,9 +105,11 @@ void check_add_node(stack_ptr st,char name[15],int type, int color,int down_scop
 
             //found node with same name say no node no
             printf("Found Node with same name within scope, cannot create new node\n");
+            return -1;
         }
         else{
             add_make_node(st,name,type,color,down_scope);
+            return 0;
         }
 }
 
@@ -178,7 +168,7 @@ void up_scope(stack_ptr st){
 }
 
 /*
-this method searches a stack within a scope level to see if a node is present in the stackt
+this method searches a stack within a scope level to see if a node is present in the stact
 returns pointer to node if found NULL otherwise
 */
 node_ptr up_stream_node_find(stack_ptr st, char name[15]){
@@ -203,11 +193,100 @@ node_ptr up_stream_node_find(stack_ptr st, char name[15]){
     return NULL;
 }
 
+char* near_parent(stack_ptr st, char name[15]){
+    node_ptr temp = up_stream_node_find(st,name);
+    if(temp == NULL){
+        printf("UNABLE TO FIND NODE\n");
+        return NULL;
+    }
+    while(temp->parent == NULL){
+        if(temp->prev == NULL){
+            printf("UNABLE TO FIND PARENT\n");
+            return "NA";
+        }
+        temp=temp->prev;
+    }
+    temp = temp->parent;
+    strcpy(name,temp->name);
+    return name;
+}
+
+
 int get_id_type(stack_ptr st, char name[15]){
     node_ptr temp = up_stream_node_find(st,name);
     if(temp == NULL){
-        printf("NO ID WITH NAME %s\n", name);
+        printf("NO ID WITH NAME %s WITHIN SCOPE\n", name);
+        return TYPEERR;
+    }
+    return temp->type;
+}
+
+int set_id_type(stack_ptr st, char name[15],int type){
+    node_ptr temp = up_stream_node_find(st,name);
+    if(temp == NULL){
+        printf("NO ID WITH NAME %s\n",name);
         return -1;
+    }
+    temp->type = type;
+    return 0;
+}
+
+int in_scope(stack_ptr st, char name[15]){
+    node_ptr temp = up_stream_node_find(st,name);
+    if(temp == NULL){
+        return -1;//no node in scope
+    }
+    return 1;
+}
+
+int get_func_param_count(stack_ptr st, char name[15]){
+    node_ptr temp = up_stream_node_find(st,name);
+    int params = 0;
+    if(temp == NULL){
+        printf("no func with name %s\n",name );
+        return -1;
+    }
+    if(temp->color != GREEN){
+        printf("%s is not a function\n",name);
+        return -2;
+    }
+    if(temp->child == NULL){
+        return 0;
+    }
+    if(temp->child->color != YELLOW){
+        return 0;
+    }
+    //the first child node must now be yellow
+    temp = temp->child;
+    params++;
+    while(temp->color == YELLOW && temp->next != NULL){
+        temp=temp->next;
+        if(temp->color!=YELLOW){
+            break;
+        }
+        params++;
+    }
+    return params;
+}
+
+int get_func_param_type(stack_ptr st, char name[15],int param_num){
+    node_ptr temp = up_stream_node_find(st,name);
+    if(temp == NULL){
+        printf("no func with name %s\n",name );
+        return -1;
+    }
+    int max_param_num = get_func_param_count(st,name);
+    if(max_param_num == 0){
+        return -2;//no parameters for function
+    }
+    if(max_param_num < param_num){
+        return -3;//too many function parameters in function call
+    }
+    int itter=1;
+    temp = temp->child;
+    while(param_num != itter){
+        temp = temp->next;
+        itter++;
     }
     return temp->type;
 }
@@ -219,47 +298,21 @@ void print_stack(stack_ptr st){
         while (temp->next != st->stacktop){
             if(temp->next == NULL) {
                 if(temp->child != NULL){
-                    printf("node name: %s\n",temp->name);
+                    printf("node name: %s type: %d color: %d\n",temp->name,temp->type,temp->color);
                     temp = temp->child;
                     continue;
                 }
                 else break;
             }
-            //printf("temp name: %s\n",temp->name);
+            printf("node name: %s type: %d color: %d\n",temp->name,temp->type,temp->color);
             temp = temp->next;
         }
-        printf("last node on stack: %s\n",st->stacktop->name);
+        printf("node name: %s type: %d color: %d\n",temp->name,temp->type,temp->color);
+        printf("node name: %s type: %d color: %d\n",st->stacktop->name,st->stacktop->type,st->stacktop->color);
     }
     else{
         printf("Empty Stack\n");
     }
 }
 
-
-/*
-struct node_stack stack;
-stack_ptr st = &stack;
-int main(){
-    printf("running\n");
-    check_add_node(st,"fun1",TYPEINT,GREEN,0);
-    printf("Done1\n" );
-    check_add_node(st,"x0",TYPEINT,BLUE,1);
-    printf("Done2\n" );
-    check_add_node(st,"fun2",TYPEINT,GREEN,0);
-    printf("Done3\n");
-    check_add_node(st,"x1",TYPEINT,BLUE,1);
-    printf("Done4\n" );
-    check_add_node(st,"fun3",TYPEINT,GREEN,0);
-    printf("Done5\n" );
-    check_add_node(st,"fun4",TYPEINT,GREEN,0);
-    printf("Done6\n" );
-    print_stack(st);
-    node_ptr temp = up_stream_node_find(st,"fun1");
-    if(temp != NULL){
-        printf("%s node found\n", temp->name );
-    }
-    up_scope(st);
-    return 0;
-}
-*/
 #endif

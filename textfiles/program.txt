@@ -2,23 +2,47 @@ program test (input, output);
   var a : integer;
   var b : real;
   var c : array [1..2] of integer;
-  function fun2(x: integer; y: integer) : real;
-    var e : real;
-    begin
-      a:= fun1(x, e, c, b);
-      x:= fun3(c[1], e);
-      e := e + 4.44;
-      a:= (a mod y) div x;
-      while ((a >= 4.3) and ((b <= e) or (not (a = c[a])))) do
+  var f : array [1..2] of real;
+  var g : array [1..1.5] of integer;
+  function fun1 : integer;
+    function fun5 : integer;
         begin
-          a:= c[a] + 1
+        end;
+    begin
+    end;
+  function fun2(x: integer; y: real) : real;
+    var e: real;
+    function fun3 : integer;
+        var g: integer;
+        begin
+        end;
+    function fun6 : integer;
+        begin
+        end;
+    function fun7 : integer;
+        var g: integer;
+        begin
+        end;
+    function fun4(hello: array [1..2] of integer) : integer;
+        begin
+        while(a=hello[2]) do
+            begin
+                e:=e
+            end
+        end;
+    begin
+      v := e + 4.44;
+      b:= (a mod x) / x;
+      while ((a >= 1) and ((b <= e) or (not (a = c[a])))) do
+        begin
+          b:= 2.5E2;
+          fun4 := fun4(c)
         end;
       fun2 := 2.5
     end;
 
 begin
-  b:= fun2(c[4], f[5]);
-  b:= fun2(c[4], 2);
-  if (a < 2) then a:= 1 else a := a[2];
+  b:= fun2(2,f[5]);
+  if (a>2) then a:= 2 else a := a+2;
   if (b > 4.2) then a := c[a]
 end.
