@@ -42,9 +42,8 @@ void createTable(symbolNode head){
                     fptr++;
                 }//end NL while
 
-                char tmp[] = {'N','U','L','L'};
 
-                if(strcmp(elements[0],tmp) != 0){
+                if(strcmp(elements[0],"NULL") != 0){
 
                     tkn = atoi(elements[1]);
                     attr = atoi(elements[2]);

@@ -2,48 +2,54 @@
 2      var a : integer;
 3      var b : real;
 4      var c : array [1..2] of integer;
-5    
-6      function fun1(x:integer; y:real;
-7                      z:array [1..2] of integer;
-8                      q: real) : integer;
-9        var d: integer;
-10        begin
-11          a:= 2;
-12          z[a] := 4;
-13          c[2] := 3;
-14          fun1 := c[1]
-15         end;
-16    
-17       function fun2(x: integer; y: integer) : real;
-18         var e: real;
-19    
-20         function fun3(n: ; z: real) : integer;
-tok mismatch expecting integer, real, array, instead recieved ;
-21           var e: integer;
-22           begin
-23             a:= e;
-24             e:= c[e];
-25             fun3  3
-tok mismatch expecting :=, [, instead recieved 3
-26           end;
-27    
-28         begin
-29           a:= fun1(x, e, c, b);
-30           x:= fun3(c[1], e);
-31           e := e + 4.44;
-32           a:= (a mod y) div x;
-33           while ((a >= 4) and ((b <= e)
-34                           or (not (a = c[a])))) do
-35             begin
-36               a:= c[a] + 1
-37             end;
-38           fun2 := 2.5
-39         end;
-40    
-41    
-42      b:= fun2(c[4], c[5]);
-tok mismatch expecting function, begin, instead recieved b
-43      b:= fun2(c[4],2);
-44      if (a < 2) then a:= 1 else a := a + 2;
-45      if (b > 4.2) then a := c[a]
-46    end.
+5      var f : array [25..45] of real;
+6      var g : array [1..2] of integer;
+7      function fun1 : integer;
+8        function fun5 : integer;
+9            begin
+10            end;
+11        begin
+12        end;
+13      function fun2(x: integer; y: real) : real;
+14        var e: real;
+15        var ab : array [1..2500] of real;
+16        var c: integer;
+17        function fun3 : integer;
+18            var l: integer;
+19            begin
+20            end;
+21        function fun6 : integer;
+22            begin
+23                l:= 75
+SEMERR: Identifier l is either not defined or not within scope
+24            end;
+25        function fun7 : integer;
+26            var g: integer;
+27            begin
+28            end;
+29        function fun4(hello: array [1..2] of integer) : integer;
+30            begin
+31            while(a=hello[2.5]) do
+SEMERR: Identifiers cannot be indexed with a non-integer
+SEMERR: invalid operands for operator =, operands must be of type boolean or operands must be of type integer/real
+32                begin
+33                    e:=c
+34                end
+SEMERR: Type mismatch on assignment expecting type real received type integer
+35            end;
+36        begin
+37          b := e + 4.44;
+38          b:= (a mod x) / x;
+39          while ((a >= 1) and ((b <= e) or (not (a = c)))) do
+40            begin
+41              c:= 2.5E2
+42            end;
+SEMERR: Type mismatch on assignment expecting type integer received type real
+43          fun2 := 2.5
+44        end;
+45    
+46    begin
+47      b:= fun2(2,f[5]);
+48      if (a>2) then a:= 2 else a := a+2;
+49      if (b > 4.2) then a := c[a]
+50    end.

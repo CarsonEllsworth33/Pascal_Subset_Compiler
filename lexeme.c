@@ -70,11 +70,10 @@
 #define TYPEINT       81
 #define TYPEREAL      82
 #define TYPEBOOL      83
-#define TYPEARR       84
-#define TYPEARR_INT   0
-#define TYPEARR_REAL  1
-#define TYPEERR       85
-#define TYPEVOID      86
+#define TYPEARR_INT   84
+#define TYPEARR_REAL  85
+#define TYPEERR       86
+#define TYPEVOID      87
 
 struct Lexeme
 {

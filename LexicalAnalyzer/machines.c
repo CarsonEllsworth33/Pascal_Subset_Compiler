@@ -199,7 +199,7 @@ struct Lexeme idres(char **fptr, char **bptr, symbolNode restable, symbolNode id
     idtl.tkn = LEXERROR;
     idtl.attr.val = IDTOOLONG;
 
-    struct Lexeme id;//0 is tmp value, this actually needs to be a pointer
+    struct Lexeme id;
     id.tkn = ID;
     id.attr.val = 0;
 
@@ -379,11 +379,11 @@ struct Lexeme realM(char **fptr, char **bptr){
             realerr.attr.val = REALETOOLONG;
             return realerr;
         }
-        if(realstr[0]=='0'){
+        /*if(realstr[0]=='0'){
             //printf("LEADINGZERO\n" );
             realerr.attr.val = LEADINGZERO;
             return realerr;
-        }
+        }*/
         if(realstr[fcounter+rcounter]=='0'){
             //printf("TRAILINGZERO\n");
             realerr.attr.val = TRAILINGZERO;

@@ -20,7 +20,9 @@ int main(int argc, char *argv[]) {
 	}
 	FILE *list = fopen("textfiles/listing.txt","w");
 	FILE *token = fopen("textfiles/token.txt","w");
-
+	FILE *trace = fopen("textfiles/ptrace.txt","w");
+	FILE *nodes = fopen("textfiles/nodes.txt","w");
+	FILE *address = fopen("textfiles/addresses.txt","w");
 	if(file != NULL){
 		restable = createNode(NULL,"restablehead");
 	    idtable = createNode(NULL,"idtablehead");
@@ -30,7 +32,7 @@ int main(int argc, char *argv[]) {
 		fprintf(list,"%d    %s",1,buffer);
 		fprintf(token, "Line No.   Lexeme         TOKEN-TYPE    ATTRIBUTE\n");
 
-		parse(file,list,token);
+		parse(file,list,token,trace,nodes,address);
 
 
 		//read_print_line(file,list,token);
@@ -42,9 +44,10 @@ int main(int argc, char *argv[]) {
 	fclose(file);
 	fclose(list);
 	fclose(token);
+	fclose(trace);
+	fclose(nodes);
+	fclose(address);
 
-	struct Lexeme tmp = getLexeme(10);
-	printf("getLexeme tkn: %d\ngetLexeme attr: %d\n",tmp.tkn,tmp.attr.val);
 	return 0;
 }
 
