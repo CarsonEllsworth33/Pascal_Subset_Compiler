@@ -2,9 +2,8 @@
 2      var a : integer;
 3      var b : real;
 4      var c : array [1..2] of integer;
-5      var f : array [1..2] of real;
-6      var g : array [1..1.5] of integer;
-SEMERR: non integer number used for array creation
+5      var f : array [25..45] of real;
+6      var g : array [1..2] of integer;
 7      function fun1 : integer;
 8        function fun5 : integer;
 9            begin
@@ -13,38 +12,44 @@ SEMERR: non integer number used for array creation
 12        end;
 13      function fun2(x: integer; y: real) : real;
 14        var e: real;
-15        function fun3 : integer;
-16            var g: integer;
-17            begin
-18            end;
-19        function fun6 : integer;
-20            begin
-21            end;
-22        function fun7 : integer;
-23            var g: integer;
-24            begin
-25            end;
-26        function fun4(hello: array [1..2] of integer) : integer;
+15        var ab : array [1..2500] of real;
+16        var c: integer;
+17        function fun3 : integer;
+18            var l: integer;
+19            begin
+20            end;
+21        function fun6 : integer;
+22            begin
+23                l:= 75
+SEMERR: Identifier l is either not defined or not within scope
+24            end;
+25        function fun7 : integer;
+26            var g: integer;
 27            begin
-28            while(a=hello[2]) do
-29                begin
-30                    e:=e
-31                end
-32            end;
-33        begin
-34          v := e + 4.44;
-SEMERR: Identifier v is either not defined or not within scope
-35          b:= (a mod x) / x;
-36          while ((a >= 1) and ((b <= e) or (not (a = c[a])))) do
-37            begin
-38              b:= 2.5E2;
-39              fun4 := fun4(c)
-40            end;
-41          fun2 := 2.5
-42        end;
-43    
-44    begin
-45      b:= fun2(2,f[5]);
-46      if (a>2) then a:= 2 else a := a+2;
-47      if (b > 4.2) then a := c[a]
-48    end.
+28            end;
+29        function fun4(hello: array [1..2] of integer) : integer;
+30            begin
+31            while(a=hello[2.5]) do
+SEMERR: Identifiers cannot be indexed with a non-integer
+SEMERR: invalid operands for operator =, operands must be of type boolean or operands must be of type integer/real
+32                begin
+33                    e:=c
+34                end
+SEMERR: Type mismatch on assignment expecting type real received type integer
+35            end;
+36        begin
+37          b := e + 4.44;
+38          b:= (a mod x) / x;
+39          while ((a >= 1) and ((b <= e) or (not (a = c)))) do
+40            begin
+41              c:= 2.5E2
+42            end;
+SEMERR: Type mismatch on assignment expecting type integer received type real
+43          fun2 := 2.5
+44        end;
+45    
+46    begin
+47      b:= fun2(2,f[5]);
+48      if (a>2) then a:= 2 else a := a+2;
+49      if (b > 4.2) then a := c[a]
+50    end.

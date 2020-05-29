@@ -6,14 +6,17 @@ a               integer         test
 b               real            test           
 c               integer array   test           
 f               real array      test           
+g               integer array   test           
 fun1            TBD             test           
 fun5            TBD             fun1           
 fun2            TBD             test           
 x               integer         fun2           
 y               real            fun2           
 e               real            fun2           
+ab              real array      fun2           
+c               integer         fun2           
 fun3            TBD             fun2           
-g               integer         fun3           
+l               integer         fun3           
 fun6            TBD             fun2           
 fun7            TBD             fun2           
 g               integer         fun7           

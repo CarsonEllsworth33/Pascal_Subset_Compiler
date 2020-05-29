@@ -1,5 +1,5 @@
-#ifndef NODETEST_H
-#define NODETEST_H
+#ifndef NODE_H
+#define NODE_H
 /*
 What needs to be done:
     proper working nodes in terms of creation addressing printing
@@ -26,7 +26,7 @@ Possible problems:
 /*
 All functions that have parameters require the first parameter to be treated as a child node
 */
-
+char np_name[15];
 
 struct node{
     int type;
@@ -207,8 +207,9 @@ char* near_parent(stack_ptr st, char name[15]){
         temp=temp->prev;
     }
     temp = temp->parent;
-    strcpy(name,temp->name);
-    return name;
+    strcpy(np_name,temp->name);
+    printf("TEST: np_name %s!!!!!!!!!!!!!!!\n", np_name);
+    return np_name;
 }
 
 

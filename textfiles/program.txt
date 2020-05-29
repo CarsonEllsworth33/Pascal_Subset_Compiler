@@ -2,8 +2,8 @@ program test (input, output);
   var a : integer;
   var b : real;
   var c : array [1..2] of integer;
-  var f : array [1..2] of real;
-  var g : array [1..1.5] of integer;
+  var f : array [25..45] of real;
+  var g : array [1..2] of integer;
   function fun1 : integer;
     function fun5 : integer;
         begin
@@ -12,12 +12,15 @@ program test (input, output);
     end;
   function fun2(x: integer; y: real) : real;
     var e: real;
+    var ab : array [1..2500] of real;
+    var c: integer;
     function fun3 : integer;
-        var g: integer;
+        var l: integer;
         begin
         end;
     function fun6 : integer;
         begin
+            l:= 75
         end;
     function fun7 : integer;
         var g: integer;
@@ -25,18 +28,17 @@ program test (input, output);
         end;
     function fun4(hello: array [1..2] of integer) : integer;
         begin
-        while(a=hello[2]) do
+        while(a=hello[2.5]) do
             begin
-                e:=e
+                e:=c
             end
         end;
     begin
-      v := e + 4.44;
+      b := e + 4.44;
       b:= (a mod x) / x;
-      while ((a >= 1) and ((b <= e) or (not (a = c[a])))) do
+      while ((a >= 1) and ((b <= e) or (not (a = c)))) do
         begin
-          b:= 2.5E2;
-          fun4 := fun4(c)
+          c:= 2.5E2
         end;
       fun2 := 2.5
     end;

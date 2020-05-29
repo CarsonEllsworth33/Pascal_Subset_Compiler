@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "../LexicalAnalyzer/lexAnalyze.c"
 #include "../lexeme.c"
-#include "../node/nodetest.c"
+#include "../node/node.c"
 #include "../tokcode2str.c"
 
 struct Lexeme tok;
@@ -293,7 +293,7 @@ int factor(){
                 return TYPEBOOL;
             }
             else{
-                fprintf(list,"SEMERR: type mismatch, expecting typecode: %d received: %d\n",TYPEBOOL,r_val);
+                fprintf(list,"SEMERR: type mismatch, expecting type: %s received: %s\n",tokcode2str(TYPEBOOL),tokcode2str(r_val));
                 return TYPEERR;
             }
         case PAREN:
@@ -926,10 +926,10 @@ int var(){
             strcpy(name,tok_ret.word);
             int i_val = get_id_type(st,name);
             printf("stmt before expr1\n");
-            r_val = varT(i_val);
             if(i_val == TYPEERR){
                 fprintf(list, "SEMERR: Identifier %s is either not defined or not within scope\n", name);
             }
+            r_val = varT(i_val);
             return r_val;
         default:
             fprintf(list,"SYNERR: tok mismatch expecting Identifier, instead received %s\n",tok.word);
@@ -1025,8 +1025,17 @@ int stmt(){//need to return type void on correct stmt
             }
             return r_val;
         case WHILE:
-            tok_match(WHILE,0); expr(); tok_match(DO,0); stmt();
-            break;
+            tok_match(WHILE,0); f_val = expr(); tok_match(DO,0); f2_val = stmt();
+            if(f_val == TYPEBOOL){
+                if(f2_val == TYPEVOID){
+                    r_val = TYPEVOID;
+                }
+                else{
+                    //handled within other statement stuff
+                    r_val = TYPEERR;
+                }
+            }
+            return r_val;
         default:
             fprintf(list,"SYNERR: tok mismatch expecting %s,%s,%s,%s instead received %s\n","Identifier","begin","if","while",tok.word);
             while (strcmp(tok.word,"else") != 0 && strcmp(tok.word,";") != 0 && strcmp(tok.word,"end") != 0) {
@@ -1144,6 +1153,8 @@ void param_lstT(){
     int gn=1;
     int scope_in =0;
     char name[15];
+    int addr_skip = addr;
+    int lex_bad = 0;
     fprintf(trace, "%s %s\n","param_lstT",tok.word);
     switch (tok.tkn) {
         case SEMICOLON:
@@ -1152,12 +1163,15 @@ void param_lstT(){
                 scope_in = 1;//go down a level in scope
                 scope_level++;
                 addr = 0;
+                fprintf(ad, "\n" );
                 scope_flag = 0;
             }
             tok_ret = tok_match(ID,0);
+            lex_bad = tok_ret.type;
             strcpy(name,tok_ret.word);
             tok_match(COLON,0); f_val = type();
-            if(f_val != TYPEERR){
+            addr=addr_skip;
+            if(f_val != TYPEERR && lex_bad != TYPEERR){
                 gn = check_add_node(st,name,f_val,YELLOW,scope_in);
             }
             if(gn != 0){
@@ -1166,8 +1180,8 @@ void param_lstT(){
                     scope_flag = 1;
                 }
             }
-            if(f_val != TYPEERR){
-                fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(f_val),near_parent(st,tok_ret.word));
+            if(f_val != TYPEERR && gn == 0){
+                fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(f_val), near_parent(st,name));
             }
             param_lstT();
             break;
@@ -1191,6 +1205,8 @@ void param_lst(){
     int scope_in = 0;
     int gn=1;
     char name[15];
+    int addr_skip=addr;
+    int lex_bad=0;
     fprintf(trace, "%s %s\n","param_lst",tok.word );
     switch (tok.tkn) {
         case ID:
@@ -1198,12 +1214,16 @@ void param_lst(){
                 scope_in = 1;//go down a level in scope
                 scope_level++;
                 addr = 0;
+                fprintf(ad, "\n" );
+                //var_ad = 0;
                 scope_flag = 0;
             }
             tok_ret = tok_match(ID,0);
+            lex_bad = tok_ret.type;
             strcpy(name,tok_ret.word);
             tok_match(COLON,0); f_val = type();
-            if(f_val != TYPEERR){
+            addr=addr_skip;
+            if(f_val != TYPEERR && lex_bad != TYPEERR){
                 gn = check_add_node(st,name,f_val,YELLOW,scope_in);
             }
             if(gn != 0){
@@ -1212,8 +1232,9 @@ void param_lst(){
                     scope_flag = 1;
                 }
             }
-            if(f_val != TYPEERR){
-                fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(f_val),near_parent(st,tok_ret.word));
+            if(f_val != TYPEERR && gn == 0){
+                //fprintf(ad,"%-15s %-15d\n",name,var_ad);
+                fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(f_val), near_parent(st,name));
             }
             param_lstT();
             break;
@@ -1309,7 +1330,7 @@ int sub_head(){
             tok_match(FUNCTION,0); tok_ret = tok_match(ID,0);
             strcpy(func_name,tok_ret.word);
             check_add_node(st,tok_ret.word,TYPEVOID,GREEN,scope_in);
-            fprintf(nodes,"%-15s %-15s %-15s\n",func_name,"TBD",near_parent(st,tok_ret.word));
+            fprintf(nodes,"%-15s %-15s %-15s\n",func_name,"TBD", near_parent(st,func_name));
             scope_flag=1;
             f_val = sub_headT();
             set_id_type(st,func_name,f_val);
@@ -1457,20 +1478,34 @@ int type(){
     int s;
     int arr_check;
     int err_flag=0;
+    int backup_addr = addr;
     switch (tok.tkn) {
         case INTEGER: case REAL:
             s = std_type();
+            if(s == TYPEINT){
+                addr = addr + 4;
+            }
+            else if(s == TYPEREAL){
+                addr = addr + 8;
+            }
+            else{
+                addr = backup_addr;
+            }
             return s;
         case ARRAY:
             //for type checking in p3 the two num values need to be of type integer
             tok_match(ARRAY,0); tok_match(BRACK,BRACK_OPEN);
-            arr_check = tok_match(NUM,0).type;
+            tok_ret = tok_match(NUM,0);
+            arr_check = tok_ret.type;
+            int num1 = atoi(tok_ret.word);
             if(arr_check != TYPEINT){
                 err_flag=1;
                 fprintf(list, "SEMERR: non integer number used for array creation\n" );
             }
             tok_match(DOTDOT,0);
-            arr_check = tok_match(NUM,0).type;
+            tok_ret = tok_match(NUM,0);
+            arr_check = tok_ret.type;
+            int num2 = atoi(tok_ret.word);
             if(arr_check != TYPEINT){
                 err_flag=1;
                 fprintf(list, "SEMERR: non integer number used for array creation\n" );
@@ -1482,6 +1517,24 @@ int type(){
             }
             if(err_flag){
                 s=TYPEERR;
+                addr = backup_addr;
+            }
+            if(num1 > num2){
+                addr = backup_addr;
+                fprintf(list, "SEMERR: the first index of an array cannot be greater than the second\n" );
+                s=TYPEERR;
+            }
+            else{
+                if(s-3 == TYPEINT){
+                    addr = addr + ((num2 - num1)+1)*4;
+                }
+                else if(s-3 == TYPEREAL){
+                    addr = addr + ((num2 - num1)+1)*8;
+                }
+                else{
+                    addr = backup_addr;
+                }
+
             }
             return s;
         default:
@@ -1502,20 +1555,24 @@ void decsT(){
     char name[15];
     int gn=1;
     int scope_in = 0;
+    int var_ad = addr;
+    int lex_bad=0;
     switch(tok.tkn){
         case VAR://grab a variable declaration from here
             if(scope_flag == 1){
                 scope_in = 1;//go down a level in scope
                 scope_level++;
                 addr = 0;
+                var_ad = 0;
+                fprintf(ad, "\n" );
                 scope_flag = 0;
             }
             tok_match(VAR, 0); tok_ret = tok_match(ID,0);
+            lex_bad = tok_ret.type;
             strcpy(name,tok_ret.word);
             tok_match(COLON, 0); f_val = type();
-            printf("TEST: f_val: %d\n",f_val );
-            if(f_val != TYPEERR){
-                gn = check_add_node(st,name,f_val,BLUE,0);//create blue node
+            if(f_val != TYPEERR && lex_bad != TYPEERR){
+                gn = check_add_node(st,name,f_val,BLUE,scope_in);//create blue node
             }
             if(gn < 0){
                 fprintf(list, "SEMERR: variable %s already declared in scope\n",name );
@@ -1523,8 +1580,9 @@ void decsT(){
                     scope_flag = 1;
                 }
             }
-            if(f_val != TYPEERR){
-                fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(f_val),near_parent(st,tok_ret.word));
+            if(f_val != TYPEERR && gn == 0){
+                fprintf(ad,"%-15s %-15d %-15s\n",name,var_ad,near_parent(st,name));
+                fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(f_val), near_parent(st,name));
             }
             tok_match(SEMICOLON,0);
             decsT();
@@ -1548,6 +1606,8 @@ void decs(){
     int scope_in = 0;
     char name[15];
     int gn=1;
+    int var_ad=addr;
+    int lex_bad=0;
     fprintf(trace, "%s %s\n","decs" ,tok.word);
     switch(tok.tkn){
         case VAR:
@@ -1556,14 +1616,17 @@ void decs(){
                 scope_in = 1;//go down a level in scope
                 scope_level++;
                 addr = 0;
+                var_ad = 0;
+                fprintf(ad, "\n" );
                 scope_flag = 0;
             }
             //create a blue node here and attach it to what the last function (green node) to put it into scope
             tok_match(VAR, 0); tok_ret = tok_match(ID,0);
+            lex_bad = tok_ret.type;
             strcpy(name,tok_ret.word);
             tok_match(COLON, 0); f_val = type();
             //down scope value must be 1 on the first declaration
-            if(f_val != TYPEERR){
+            if(f_val != TYPEERR && lex_bad != TYPEERR){
                 gn = check_add_node(st,name,f_val,BLUE,scope_in);//create blue node
             }
             if(gn != 0){
@@ -1572,8 +1635,9 @@ void decs(){
                     scope_flag = 1;
                 }
             }
-            if(f_val != TYPEERR){
-                fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(f_val),near_parent(st,tok_ret.word));
+            if(f_val != TYPEERR && gn == 0){
+                fprintf(ad,"%-15s %-15d %-15s\n",name,var_ad,near_parent(st,name));
+                fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(f_val), near_parent(st,name));
             }
             tok_match(SEMICOLON,0);
             decsT();
@@ -1594,6 +1658,7 @@ void id_lstT(){
     fprintf(trace, "%s %s\n","id_lstT"  ,tok.word);
     char syncSet[] = {')'};
     char name[15];
+    char p_name[15];
     int scope_in =0;
     switch(tok.tkn){
         case COMMA:
@@ -1607,7 +1672,9 @@ void id_lstT(){
             strcpy(name,tok_ret.word);
             if(tok_ret.type != TYPEERR){
                 check_add_node(st,tok_ret.word,TYPEVOID,BLUE,scope_in);
-                fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(TYPEVOID),near_parent(st,tok_ret.word));
+                //fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(TYPEVOID),near_parent(st,name));
+                strcpy(p_name,near_parent(st,name));
+                fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(TYPEVOID),p_name);
             }
             else{
                 if(scope_in==1){
@@ -1639,6 +1706,7 @@ void id_lst(){
     char syncSet[] = {')'};
     int scope_in = 0;
     char name[15];
+    char p_name[15];
     switch(tok.tkn){
         case ID:
             if(scope_flag == 1){
@@ -1651,7 +1719,8 @@ void id_lst(){
             strcpy(name,tok_ret.word);
             if(tok_ret.type != TYPEERR){
                 check_add_node(st,tok_ret.word,TYPEVOID,BLUE,scope_in);
-                fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(TYPEVOID),near_parent(st,tok_ret.word));
+                strcpy(p_name,near_parent(st,name));
+                fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(TYPEVOID),p_name);
             }
             else{
                 if(scope_in == 1){
@@ -1727,7 +1796,10 @@ void prgm(){
             strcpy(name,tok_ret.word);
             tok_match(PAREN, PAREN_OPEN);
             check_add_node(st,name,TYPEVOID,GREEN,0);//create program node here
-            fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(TYPEVOID),near_parent(st,tok_ret.word));
+            //fprintf(nodes,"%-15s %-15s %-15s\n",name,tokcode2str(TYPEVOID),near_parent(st,tok_ret.word));
+            fprintf(nodes,"%-15s ",name);
+            fprintf(nodes , "%-15s ",tokcode2str(TYPEVOID) );
+            fprintf(nodes, "%-15s\n", near_parent(st,name));
             id_lst(); tok_match(PAREN,PAREN_CLOSE); tok_match(SEMICOLON,0);
             prgmT();
         break;
@@ -1753,6 +1825,7 @@ void parse(FILE *f,FILE *l, FILE *t, FILE *tr,FILE *n,FILE *a){
     nodes = n;
     ad = a;
     fprintf(nodes, "%-15s %-15s %-15s\n","nodes:","type:","NP:" );
+    fprintf(ad, "%-15s %-15s %-15s\n","node name","address","scope function");
     tok = get_next_token(file,list,token);
     prgm();
     tok_match(EOF,0);
