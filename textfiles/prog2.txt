@@ -15,12 +15,11 @@ program test (input, output);
     var ab : array [1..2500] of real;
     var c: integer;
     function fun3 : integer;
-        var l: integer;
+        var g: integer;
         begin
         end;
     function fun6 : integer;
         begin
-            l:= 75
         end;
     function fun7 : integer;
         var g: integer;
@@ -28,9 +27,9 @@ program test (input, output);
         end;
     function fun4(hello: array [1..2] of integer) : integer;
         begin
-        while(a=hello[2.5]) do
+        while(a=hello[2]) do
             begin
-                e:=c
+                e:=e
             end
         end;
     begin
@@ -38,7 +37,7 @@ program test (input, output);
       b:= (a mod x) / x;
       while ((a >= 1) and ((b <= e) or (not (a = c)))) do
         begin
-          c:= 2.5E2
+          b:= 2.5E2
         end;
       fun2 := 2.5
     end;
@@ -47,4 +46,3 @@ begin
   b:= fun2(2,f[5]);
   if (a>2) then a:= 2 else a := a+2;
   if (b > 4.2) then a := c[a]
-end.

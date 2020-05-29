@@ -15,41 +15,35 @@
 15        var ab : array [1..2500] of real;
 16        var c: integer;
 17        function fun3 : integer;
-18            var l: integer;
+18            var g: integer;
 19            begin
 20            end;
 21        function fun6 : integer;
 22            begin
-23                l:= 75
-SEMERR: Identifier l is either not defined or not within scope
-24            end;
-25        function fun7 : integer;
-26            var g: integer;
-27            begin
-28            end;
-29        function fun4(hello: array [1..2] of integer) : integer;
-30            begin
-31            while(a=hello[2.5]) do
-SEMERR: Identifiers cannot be indexed with a non-integer
-SEMERR: invalid operands for operator =, operands must be of type boolean or operands must be of type integer/real
-32                begin
-33                    e:=c
-34                end
-SEMERR: Type mismatch on assignment expecting type real received type integer
-35            end;
-36        begin
-37          b := e + 4.44;
-38          b:= (a mod x) / x;
-39          while ((a >= 1) and ((b <= e) or (not (a = c)))) do
-40            begin
-41              c:= 2.5E2
-42            end;
-SEMERR: Type mismatch on assignment expecting type integer received type real
-43          fun2 := 2.5
-44        end;
-45    
-46    begin
-47      b:= fun2(2,f[5]);
-48      if (a>2) then a:= 2 else a := a+2;
-49      if (b > 4.2) then a := c[a]
-50    end.
+23            end;
+24        function fun7 : integer;
+25            var g: integer;
+26            begin
+27            end;
+28        function fun4(hello: array [1..2] of integer) : integer;
+29            begin
+30            while(a=hello[2]) do
+31                begin
+32                    e:=e
+33                end
+34            end;
+35        begin
+36          b := e + 4.44;
+37          b:= (a mod x) / x;
+38          while ((a >= 1) and ((b <= e) or (not (a = c)))) do
+39            begin
+40              b:= 2.5E2
+41            end;
+42          fun2 := 2.5
+43        end;
+44    
+45    begin
+46      b:= fun2(2,f[5]);
+47      if (a>2) then a:= 2 else a := a+2;
+48      if (b > 4.2) then a := c[a]
+49    end.

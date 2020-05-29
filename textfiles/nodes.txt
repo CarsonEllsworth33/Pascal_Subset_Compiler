@@ -16,7 +16,7 @@ e               real            fun2
 ab              real array      fun2           
 c               integer         fun2           
 fun3            TBD             fun2           
-l               integer         fun3           
+g               integer         fun3           
 fun6            TBD             fun2           
 fun7            TBD             fun2           
 g               integer         fun7           
